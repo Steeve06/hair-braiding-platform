@@ -1,0 +1,32 @@
+name: Lint
+# Acceptance Criteria for Lint Job:
+# 1. Code must be successfully checked out from the repository.
+# 2. Node.js environment (v18) must be correctly initialized with npm caching.
+# 3. All project dependencies must install without errors.
+# 4. The 'npm run lint' command must execute and pass with a zero exit code (no linting errors).
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run linter
+        run: npm run lint
