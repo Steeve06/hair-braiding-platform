@@ -1,0 +1,103 @@
+.homepage {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+}
+
+.status {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.statusButton {
+    background: transparent;
+    border: 1px solid #D4AF37;
+    color: #D4AF37;
+    padding: 10px 20px;
+    border-radius: 50px;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.statusButton:hover {
+    background: #D4AF37;
+    color: #000;
+}
+
+.heroSection {
+    max-width: 800px;
+}
+
+.mainTitle {
+    font-size: 3.5rem;
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.highlight {
+    color: #D4AF37;
+    /* Gold highlight for Miah */
+}
+
+.subTitle {
+    display: block;
+    font-size: 1.25rem;
+    color: #D4AF37;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+}
+
+.description {
+    color: #a0a0a0;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 3rem;
+}
+
+.CTA {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.primaryBtn,
+.secondaryBtn {
+    background: none;
+    border: none;
+    padding: 0;
+    /* Let the Link handle padding */
+}
+
+.link {
+    display: inline-block;
+    padding: 15px 35px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+    border-radius: 4px;
+}
+
+.primaryBtn .link {
+    background-color: #D4AF37;
+    color: #000;
+}
+
+.secondaryBtn .link {
+    border: 1px solid #fff;
+    color: #fff;
+}
+
+.primaryBtn .link:hover {
+    background-color: #f1cf6d;
+}
+
+.secondaryBtn .link:hover {
+    background-color: #fff;
+    color: #000;
+}

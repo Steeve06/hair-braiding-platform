@@ -1,0 +1,100 @@
+.navContainer {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: #040404;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    height: 80px;
+    display: flex;
+    align-items: center;
+}
+
+.navContent {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logoArea {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.logoAccent {
+    color: #ffffff;
+    /* rose-600 */
+}
+
+.linksDesktop {
+    display: none;
+    /* Hidden on mobile */
+    gap: 2rem;
+    align-items: center;
+}
+
+.navLink {
+    text-decoration: none;
+    color: #ffffff;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.navLink:hover {
+    color: #D4AF37;
+}
+
+.primaryBtn {
+    background-color: #D4AF37;
+    color: white !important;
+    padding: 0.6rem 1.5rem;
+    border-radius: 9999px;
+    transition: background-color 0.3s ease;
+}
+
+.primaryBtn:hover {
+    background-color: #D4AF37;
+}
+
+.mobileMenuBtn {
+    display: block;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #1f2937;
+}
+
+/* Media Query for Desktop */
+@media (min-width: 768px) {
+    .linksDesktop {
+        display: flex;
+    }
+
+    .mobileMenuBtn {
+        display: none;
+    }
+}
+
+/* Mobile Dropdown Styles */
+.mobileMenu {
+    position: absolute;
+    top: 80px;
+    left: 0;
+    width: 100%;
+    background: white;
+    border-top: 1px solid #f3f4f6;
+    padding: 1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
