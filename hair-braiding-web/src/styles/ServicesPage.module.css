@@ -1,0 +1,84 @@
+.pageContainer {
+    background-color: rgb(44, 45, 45);
+    min-height: 100vh;
+    width: 100%;
+    padding-top: 5rem;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 5rem;
+}
+
+.heroSection {
+    text-align: center;
+    color: white;
+    padding: 2rem;
+    margin-top: 3rem;
+}
+
+.mainTitle {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.description {
+    font-size: 1.2rem;
+    margin-top: 1rem;
+    color: #ccc;
+    max-width: 1000px;
+}
+
+.searchContainer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 3rem;    /* Space between search and cards */
+    padding: 0 1rem;
+}
+
+.searchInput {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 20px;
+    border-radius: 4px;
+    border: 1px solid #333;
+    background-color: #000;
+    color: #fff;
+    outline: none;
+}
+
+.searchInput:focus {
+    border-color: #D4AF37;
+}
+
+.searchButton {
+    padding: 12px 24px;
+    background-color: #D4AF37;
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.searchButton:hover {
+    background-color: #bfa030;
+}
+
+.servicesList {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);    /* 4 cards per row */
+    gap: 1.5rem;
+    padding: 2rem;
+    max-width: 1500px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .servicesList {
+        grid-template-columns: 1fr;
+    }
+}

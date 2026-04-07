@@ -1,10 +1,49 @@
-.appContainer {
+.app-container {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    background-color: #272727;
+    background-color: #000000;
+}
+
+.bg-glow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.glow-top-left {
+    position: absolute;
+    top: -50px;
+    left: -50px;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(186, 152, 39, 0.175) 0%, rgba(0, 0, 0, 0) 70%);
+    filter: blur(80px);
+}
+
+.glow-bottom-right {
+    position: absolute;
+    bottom: -50px;
+    right: -50px;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(186, 152, 39, 0.175) 0%, rgba(0, 0, 0, 0) 70%);
+    filter: blur(100px);
 }
 
 .main-content {
     flex-grow: 1;
+}
+
+nav,
+footer {
+    background-color: #000000 !important;
+    position: relative;
+    z-index: 10;    /* Ensures they stay above any background effects */
 }

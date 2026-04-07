@@ -1,33 +1,44 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-
-// Layout Components
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-
-// Page Components
 import Home from './pages/Homepage';
-
-// Styles
+import ServicesPage from './pages/ServicesPage';
 import './App.css';
+
+function AppContent() {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+
+  return (
+    <div className="appContainer">
+      {/* Only show glow on Home Page if desired, or keep it 
+          and let ServicesPage cover it with its own background */}
+      {isHomePage && (
+        <div className="bg-glow-container">
+          <div className="glow-top-left"></div>
+          <div className="glow-bottom-right"></div>
+        </div>
+      )}
+
+      <Navbar />
+
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/services" element={<ServicesPage />} />
+        </Routes>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
 
 function App() {
   return (
     <Router>
-      <div className="appContainer">
-        {/* Navbar*/}
-        <Navbar />
-        
-        <main className="flex-grow pt-20">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            {/* Future routes like /services, /booking, /gallery will go here */}
-          </Routes>
-        </main>
-
-        {/* The Footer  */}
-        <Footer />
-      </div>
+      <AppContent />
     </Router>
   );
 }
