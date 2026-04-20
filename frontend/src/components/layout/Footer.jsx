@@ -1,4 +1,4 @@
-import React from 'react';
+import _React from 'react';
 import { SOCIAL_LINKS, STUDIO_CONFIG } from '../../utils/constants';
 
 const Footer = () => {

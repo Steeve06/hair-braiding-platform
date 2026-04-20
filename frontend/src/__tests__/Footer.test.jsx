@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import Footer from '../components/layout/Footer';
+import _Footer from '../components/layout/Footer';
 import { STUDIO_CONFIG } from '../utils/constants'; // Import the source of truth
 import '@testing-library/jest-dom';
 
