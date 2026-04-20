@@ -40,30 +40,6 @@ export const SERVICES = [
     price: '$220',
     duration: '5-7 HRS',
     image: 'https://images.unsplash.com/photo-1646244439191-2ca826645399?q=80&w=800'
-  },
-    {
-    id: 'III',
-    title: 'Box Braids',
-    description: 'Classic, timeless protection style with fully customizable length and thickness. The ultimate low-maintenance look.',
-    price: '$180',
-    duration: '4-6 HRS',
-    image: 'https://images.unsplash.com/photo-1646244439191-2ca826645399?q=80&w=800' // Path to your images
-  },
-  {
-    id: 'IV',
-    title: 'Knotless Braids',
-    description: 'Feed-in technique with no knot at the root – lighter, less tension, more natural. Our most requested service.',
-    price: '$220',
-    duration: '5-7 HRS',
-    image: 'https://images.unsplash.com/photo-1646244439191-2ca826645399?q=80&w=800'
-  },
-  {
-    id: 'V',
-    title: 'Goddess Braids',
-    description: 'Elevated version of the classic box braid with added volume and dimension for a more glamorous look.',
-    price: '$250',
-    duration: '6-8 HRS',
-    image: 'https://images.unsplash.com/photo-1646244439191-2ca826645399?q=80&w=800'
   }
 ];
 
