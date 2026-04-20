@@ -57,7 +57,7 @@ describe('Services Page', () => {
   it('contains exactly one "Inquire Now" button per service', () => {
     renderWithRouter(<Services />);
     
-    const buttons = screen.getAllByRole('button', { name: /inquire now/i });
+    const buttons = screen.getAllByRole('button', { name: /book now/i });
     expect(buttons.length).toBe(SERVICES.length);
   });
 
