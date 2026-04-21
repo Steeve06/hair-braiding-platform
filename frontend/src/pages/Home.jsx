@@ -1,5 +1,5 @@
-import _React from 'react';
-import _Hero from '../components/layout/Hero';
+import React from 'react';
+import Hero from '../components/layout/Hero';
 
 const Home = () => {
   return (
