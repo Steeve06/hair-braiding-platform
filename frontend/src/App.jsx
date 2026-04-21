@@ -1,10 +1,19 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import Home from './pages/Home';
 import Services from './pages/Services';
 import Booking from './pages/Booking';
+import AdminDashboard from './pages/AdminDashboard';
+
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem('adminToken');
+  if (!token) {
+    return <Navigate to="/" />;
+  }
+  return children;
+}
 
 function App() {
   return (
@@ -15,6 +24,11 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />
           <Route path="/bookings" element={<Booking />} />
+          <Route path='/admin-dashboard' element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
         </Routes>
         <Footer />
       </div>

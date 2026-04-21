@@ -1,16 +1,31 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import axios from 'axios';
 
 const AdminLoginModal = ({ isOpen, onClose }) => {
   const [username, setUsername] = useState('admin'); // Default for demo
   const [password, setPassword] = useState('braid2023'); // Default for demo
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log('Logging in with:', { username, password });
-    // Add authentication logic here (e.g., call API)
-    // On success: redirect to Admin Dashboard
-    // On failure: show error message
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/token/', {
+        username,
+        password,
+      });
+
+      if (response.data.access) {
+        localStorage.setItem('adminToken', response.data.access);
+        console.log('Login successful!');
+        onClose();
+        //redirect to dashboard
+        window.location.href = '/admin-dashboard';
+      }
+    } catch (error) {
+      alert('Login failed. Authorized Personnel Only. Please check your credentials and try again.');
+    }
+
   };
 
   if (!isOpen) return null;
@@ -34,7 +49,7 @@ const AdminLoginModal = ({ isOpen, onClose }) => {
           <h2 className="text-3xl font-serif text-white tracking-wide">
             Admin Login
           </h2>
-          <p className="text-[10px] text-white/30 mt-2 tracking-widest uppercase leading-relaxed max-w-[200px] mx-auto">
+          <p className="text-[10px] text-white/30 mt-2 tracking-widest uppercase leading-relaxed max-w-50 mx-auto">
             Restricted Access • Authorized Personnel Only
           </p>
         </div>

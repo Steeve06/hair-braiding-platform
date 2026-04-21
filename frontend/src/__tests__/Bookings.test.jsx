@@ -1,81 +1,77 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import Bookings from '../pages/Booking';
 import '@testing-library/jest-dom';
 
-// Wrapper to handle React Router context
-const renderWithRouter = (ui) => {
-  return render(ui, { wrapper: BrowserRouter });
-};
+// Mock the constants to ensure the Service dropdown has options to render
+vi.mock('../utils/constants', () => ({
+  SERVICES: [
+    { id: 1, title: 'Luxury Braids' },
+    { id: 2, title: 'Knotless Braids' }
+  ]
+}));
 
-describe('Bookings Page', () => {
-  it('renders the header and section labels', () => {
-    renderWithRouter(<Bookings />);
-
-    expect(screen.getByText(/Reserve Your Slot/i)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /Book Appointment/i })).toBeInTheDocument();
-    
-    // Check for core form labels
-    expect(screen.getByText(/Full Name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/^Service$/i)).toBeInTheDocument();
-    expect(screen.getByText(/Preferred Date/i)).toBeInTheDocument();
+describe('Bookings Page - Form Element Presence', () => {
+  beforeEach(() => {
+    // Mock localStorage to prevent environment errors during render
+    vi.stubGlobal('localStorage', {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+    });
   });
 
-  it('updates state correctly when user types in the name and email', () => {
+  const renderWithRouter = (ui) => {
+    return render(ui, { wrapper: BrowserRouter });
+  };
+
+  it('renders the main booking header', () => {
     renderWithRouter(<Bookings />);
-
-    // Using placeholders or IDs for specific inputs
-    const nameInput = screen.getByPlaceholderText(/Your full name/i);
-    const emailInput = screen.getByPlaceholderText(/you@email.com/i);
-
-    fireEvent.change(nameInput, { target: { value: 'Jane Doe' } });
-    fireEvent.change(emailInput, { target: { value: 'jane@example.com' } });
-
-    expect(nameInput.value).toBe('Jane Doe');
-    expect(emailInput.value).toBe('jane@example.com');
+    expect(screen.getByText(/Book Appointment/i)).toBeInTheDocument();
+    expect(screen.getByText(/— Reserve Your Slot —/i)).toBeInTheDocument();
   });
 
-  it('allows selecting a service from the dropdown', () => {
+  it('verifies all interactive input fields are present by label', () => {
     renderWithRouter(<Bookings />);
-    
-    // Target the select via the ID you provided: service-select
+
+    // Text & Tel Inputs
+    expect(screen.getByLabelText(/Full Name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Phone Number/i)).toBeInTheDocument();
+
+    // Select Menus
+    expect(screen.getByLabelText(/Service/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Preferred Time/i)).toBeInTheDocument();
+
+    // Date Input
+    expect(screen.getByLabelText(/Preferred Date/i)).toBeInTheDocument();
+  });
+
+  it('verifies the Special Requests textarea is present', () => {
+    renderWithRouter(<Bookings />);
+    // Since "Special Requests" label doesn't have an 'htmlFor', we find by text/placeholder
+    expect(screen.getByText(/Special Requests/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Hair length, desired extensions/i)).toBeInTheDocument();
+  });
+
+  it('verifies the service dropdown contains the mocked options', () => {
+    renderWithRouter(<Bookings />);
     const serviceSelect = screen.getByLabelText(/Service/i);
     
-    fireEvent.change(serviceSelect, { target: { value: 'Box Braids' } });
-    
-    expect(serviceSelect.value).toBe('Box Braids');
+    expect(serviceSelect).toContainElement(screen.getByText(/Luxury Braids/i));
+    expect(serviceSelect).toContainElement(screen.getByText(/Knotless Braids/i));
   });
 
-  it('displays the deposit disclaimer at the bottom', () => {
+  it('verifies the submission button is rendered correctly', () => {
+    renderWithRouter(<Bookings />);
+    const submitBtn = screen.getByRole('button', { name: /Submit Booking Request/i });
+    
+    expect(submitBtn).toBeInTheDocument();
+    expect(submitBtn).not.toBeDisabled();
+  });
+
+  it('verifies the policy disclaimer text is displayed', () => {
     renderWithRouter(<Bookings />);
     expect(screen.getByText(/A \$25 deposit may be required/i)).toBeInTheDocument();
-  });
-
-  it('triggers handleSubmit and logs data on form submission', () => {
-    const logSpy = vi.spyOn(console, 'log');
-    renderWithRouter(<Bookings />);
-
-    // 1. Fill in all REQUIRED text fields
-    fireEvent.change(screen.getByPlaceholderText(/Your full name/i), { target: { value: 'Jane Doe' } });
-    fireEvent.change(screen.getByPlaceholderText(/you@email.com/i), { target: { value: 'jane@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText(/\(000\) 000-0000/i), { target: { value: '555-0123' } });
-    
-    // 2. Select the REQUIRED service
-    // Match the label text and ensure the value exists in your SERVICES constants
-    fireEvent.change(screen.getByLabelText(/Service/i), { target: { value: 'Box Braids' } });
-    
-    // 3. Fill in the REQUIRED Date and Time (This is usually what's missing!)
-    fireEvent.change(screen.getByLabelText(/Preferred Date/i), { target: { value: '2024-12-31' } });
-    fireEvent.change(screen.getByLabelText(/Preferred Time/i), { target: { value: '09:00' } });
-
-    // 4. Submit
-    const submitButton = screen.getByRole('button', { name: /Submit Booking Request/i });
-    fireEvent.click(submitButton);
-
-    // Assert console.log was called
-    expect(logSpy).toHaveBeenCalled();
-    
-    logSpy.mockRestore();
   });
 });

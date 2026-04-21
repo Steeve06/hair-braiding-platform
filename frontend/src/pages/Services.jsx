@@ -1,9 +1,30 @@
-import React from 'react';
+// eslint-disable-next-line no-unused-vars
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SERVICES } from '../utils/constants';
+import axios from 'axios';
 
 const Services = () => {
+  const [services, setServices] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+      const response = await axios.get('http://127.0.0.1:8000/api/services/');
+      setServices(response.data);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+    fetchServices();
+  }, []);
+
   const navigate = useNavigate();
+
+  if (isLoading) {
+    return <div className="text-white text-center pt-40">Loading...</div>;
+  }
+
   return (
     <div className="bg-luxury-black min-h-screen pt-32 pb-20 px-6">
       {/* Header Section */}
@@ -18,7 +39,7 @@ const Services = () => {
 
       {/* Services List */}
       <div className="max-w-7xl mx-auto space-y-32">
-        {SERVICES.map((service, index) => (
+        {services.map((service, index) => (
           <div 
             key={service.id}
             className={`flex flex-col md:items-center gap-12 md:gap-24 ${
@@ -57,7 +78,7 @@ const Services = () => {
                 </div>
                 <button 
                   className="text-[10px] tracking-[0.2em] text-white uppercase border-b border-luxury-gold pb-1 hover:text-luxury-gold transition-colors"
-                  onClick={() => navigate('/booking')}
+                  onClick={() => navigate('/bookings')}
                 >
                   Book Now
                 </button>

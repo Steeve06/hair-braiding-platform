@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
+import axios from 'axios';
 import { SERVICES } from '../utils/constants';
 
 const Bookings = () => {
@@ -13,10 +14,35 @@ const Bookings = () => {
     notes: ''
   });
 
-  const handleSubmit = (e) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState({ type: '', message: '' });
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Booking Request:', formData);
-    // Logic for backend integration goes here
+    setIsLoading(true);
+    setStatus({ type: '', message: '' });
+
+    try {
+      //point to django backend endpoint for booking creation
+      const response = await axios.post('http://127.0.0.1:8000/api/bookings/', {
+        full_name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        service: formData.service,
+        date: formData.date,
+        time: formData.time,
+        notes: formData.notes
+      });
+
+      if (response.status === 201) {
+        setStatus({ type: 'success', message: 'Booking request submitted successfully! We will contact you soon.' });
+      }
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+      setStatus({ type: 'error', message: 'Failed to submit booking. Please try again later.' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const inputClasses = "w-full bg-black/40 border border-white/10 px-4 py-3 text-white focus:border-luxury-gold outline-none transition-colors duration-300 placeholder:text-white/20";
@@ -38,6 +64,15 @@ const Bookings = () => {
       {/* Booking Form Container */}
       <div className="max-w-2xl mx-auto bg-white/5 p-8 md:p-12 border border-white/5">
         <form onSubmit={handleSubmit} className="space-y-8">
+
+          {/* Status Message */}
+          {status.message && (
+            <div className={`p-4 text-[11px] tracking-widest text-center uppercase border ${
+              status.type === 'success' ? 'border-luxury-gold text-luxury-gold' : 'border-red-500 text-red-500'
+            }`}>
+              {status.message}
+            </div>
+          )}
           
           {/* Full Name */}
           <div>
@@ -137,9 +172,14 @@ const Bookings = () => {
           <div className="pt-4">
             <button 
               type="submit"
-              className="w-full bg-luxury-gold text-black py-4 text-[11px] font-bold tracking-[0.3em] uppercase hover:bg-white transition-colors duration-500"
+              disabled={isLoading}
+              className={`w-full py-4 text-[11px] font-bold tracking-[0.3em] uppercase transition-colors duration-500 ${
+                isLoading 
+                ? 'bg-gray-600 text-black cursor-not-allowed' 
+                : 'bg-luxury-gold text-black hover:bg-white'
+              }`}
             >
-              Submit Booking Request
+              {isLoading ? 'Processing...' : 'Submit Booking Request'}
             </button>
             <p className="text-[10px] text-white/30 text-center mt-6 tracking-widest leading-relaxed">
               A $25 deposit may be required to secure your slot. We'll reach out within 24 hours to confirm.
