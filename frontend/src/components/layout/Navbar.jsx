@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AdminLoginModal from '../common/AdminLoginModal';
 
-// Professional Practice: Keep static data outside the component 
-// to prevent re-creation on every render.
+  // Professional Practice: Keep static data outside the component 
+  // to prevent re-creation on every render.
 const navLinks = [
   { name: 'HOME', href: '/' },
   { name: 'SERVICES', href: '/services' },
@@ -15,6 +16,14 @@ const navLinks = [
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+
+  const handleAdminClick = () => {
+    // Prevent navigating; open the modal instead.
+    setIsAdminModalOpen(true);
+    // On mobile, close the mobile menu
+    setIsMobileMenuOpen(false);
+  };
 
   // Handle scroll effect for the glassmorphism background
   useEffect(() => {
@@ -56,7 +65,7 @@ const Navbar = () => {
               {link.name}
             </a>
           ))}
-          <button className="border border-luxury-gold/40 px-5 py-2 text-[10px] tracking-[0.2em] text-luxury-gold hover:bg-luxury-gold hover:text-black transition-all duration-300">
+          <button onClick={handleAdminClick} className="border border-luxury-gold/40 px-5 py-2 text-[10px] tracking-[0.2em] text-luxury-gold hover:bg-luxury-gold hover:text-black transition-all duration-300">
             ADMIN ONLY
           </button>
         </div>
@@ -99,6 +108,9 @@ const Navbar = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Admin Login Modal */}
+      <AdminLoginModal isOpen={isAdminModalOpen} onClose={() => setIsAdminModalOpen(false)} />
     </nav>
   );
 };
