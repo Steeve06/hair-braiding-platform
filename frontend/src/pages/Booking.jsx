@@ -85,7 +85,7 @@ const Bookings = () => {
             </div>
           )}
           
-          {/* Full Name */}
+          {/* Full Names */}
           <div>
             <label htmlFor="full-name" className={labelClasses}>Full Name</label>
             <input 
