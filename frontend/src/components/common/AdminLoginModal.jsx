@@ -10,13 +10,14 @@ const AdminLoginModal = ({ isOpen, onClose }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/token/', {
-        username,
-        password,
-      });
+      const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
+      const formData = new FormData();
+      formData.append('username', username);
+      formData.append('password', password);
+      const res = await axios.post(`${API_URL}/api/token/`, formData);
 
-      if (response.data.access) {
-        localStorage.setItem('adminToken', response.data.access);
+      if (res.data.access) {
+        localStorage.setItem('adminToken', res.data.access);
         console.log('Login successful!');
         onClose();
         //redirect to dashboard
