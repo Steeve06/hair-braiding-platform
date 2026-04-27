@@ -45,9 +45,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -81,8 +81,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('postgresql://neondb_owner:npg_eNWnpK2dyxF1@ep-summer-shadow-amhrs2iw-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'),
+        default=os.getenv('DATABASE_URL'),
         conn_max_age=600,
+        ssl_require=True  # <--- THIS IS THE KEY FOR NEON
     )
 }
 
@@ -122,6 +123,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173", # Your React dev server
@@ -149,3 +151,24 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'moctosteeve@gmail.com'
 EMAIL_HOST_PASSWORD = 'sbvh meqe gakv oioc' # Use a 16-digit App Password
+
+# This uses the BASE_DIR we defined at the top of the file
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+
+
+MEDIA_URL = '/media/'
+# Cloudinary will ignore this, but Django needs it defined
+MEDIA_ROOT = BASE_DIR / "media" 
+
+# Correct Storage configuration for Django 4.2+ 
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        # Change 'CompressedManifestStaticFilesStorage' to 'CompressedStaticFilesStorage'
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
