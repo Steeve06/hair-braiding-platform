@@ -44,7 +44,8 @@ const AdminDashboard = () => {
     
     try {
       const endpoint = activeTab === 'bookings' ? 'bookings/' : 'services/';
-      const res = await axios.get(`http://127.0.0.1:8000/api/${endpoint}`, config);
+      const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+      const res = await axios.get(`${API_URL}/api/${endpoint}`, config);
       setData(res.data);
     } catch (err) {
       console.error("Fetch failed", err);
@@ -63,9 +64,10 @@ const AdminDashboard = () => {
    */
   const handleUpdateStatus = async (id, newStatus) => {
     const token = localStorage.getItem('adminToken');
+    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
     try {
       await axios.patch(
-        `http://127.0.0.1:8000/api/bookings/${id}/status/`, 
+        `${API_URL}/api/bookings/${id}/status/`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -89,9 +91,10 @@ const AdminDashboard = () => {
   const handleDelete = async (id, type) => {
     if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
     const token = localStorage.getItem('adminToken');
+    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
     try {
       const endpoint = type === 'booking' ? 'bookings' : 'services';
-      await axios.delete(`http://127.0.0.1:8000/api/${endpoint}/${id}/`, {
+      await axios.delete(`${API_URL}/api/${endpoint}/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchData(); // Refresh list after deletion
@@ -106,13 +109,14 @@ const AdminDashboard = () => {
   const handleAddService = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('adminToken');
+    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
     const formData = new FormData();
     Object.keys(newService).forEach(key => {
       if (newService[key] !== null) formData.append(key, newService[key]);
     });
 
     try {
-      await axios.post('http://127.0.0.1:8000/api/services/', formData, {
+      await axios.post(`${API_URL}/api/services/`, formData, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
       });
       setShowAddService(false);
@@ -128,6 +132,7 @@ const AdminDashboard = () => {
   const handleUpdateService = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('adminToken');
+    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
     const formData = new FormData();
     Object.keys(editingService).forEach(key => {
       // Only append if it's not the existing image URL string
@@ -136,7 +141,7 @@ const AdminDashboard = () => {
     });
 
     try {
-      await axios.patch(`http://127.0.0.1:8000/api/services/${editingService.id}/`, formData, {
+      await axios.patch(`${API_URL}/api/services/${editingService.id}/`, formData, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
       });
       setShowEditService(false);

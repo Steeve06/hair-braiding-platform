@@ -30,7 +30,8 @@ const Bookings = () => {
 
     try {
       //point to django backend endpoint for booking creation
-      const response = await axios.post('http://127.0.0.1:8000/api/bookings/', {
+      const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
+      const response = await axios.post(`${API_URL}/api/bookings/`, {
         full_name: formData.fullName,
         email: formData.email,
         phone: formData.phone,

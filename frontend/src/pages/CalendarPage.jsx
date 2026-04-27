@@ -20,7 +20,8 @@ const CalendarPage = () => {
       const localDate = new Date(selectedDate.getTime() - (offset * 60 * 1000));
       const formattedDate = localDate.toISOString().split('T')[0];
       
-      const response = await axios.get(`http://127.0.0.1:8000/api/available-slots/?date=${formattedDate}`);
+      const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
+      const response = await axios.get(`${API_URL}/api/available-slots/?date=${formattedDate}`);
       setAvailableSlots(response.data.slots);
     } catch (error) {
       console.error("Error fetching slots:", error);
