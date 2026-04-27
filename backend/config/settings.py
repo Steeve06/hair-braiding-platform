@@ -130,8 +130,13 @@ USE_TZ = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173", # Your React dev server
     "https://styledbymiah.vercel.app",
+    "https://styledbymiah-6s76okgv8-steeve06s-projects.vercel.app/",
 ]
-CSRF_TRUSTED_ORIGINS = ["https://styledbymiah.vercel.app"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://styledbymiah.vercel.app",
+    "https://styledbymiah-6s76okgv8-steeve06s-projects.vercel.app/",
+    "https://backend-styledbymiah.onrender.com"
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
