@@ -100,6 +100,52 @@ const AdminDashboard = () => {
     }
   };
 
+  /**
+   * 4. ADD SERVICE
+   */
+  const handleAddService = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('adminToken');
+    const formData = new FormData();
+    Object.keys(newService).forEach(key => {
+      if (newService[key] !== null) formData.append(key, newService[key]);
+    });
+
+    try {
+      await axios.post('http://127.0.0.1:8000/api/services/', formData, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+      });
+      setShowAddService(false);
+      fetchData();
+    } catch (err) {
+      alert("Failed to add service");
+    }
+  };
+
+  /**
+   * 5. UPDATE SERVICE
+   */
+  const handleUpdateService = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('adminToken');
+    const formData = new FormData();
+    Object.keys(editingService).forEach(key => {
+      // Only append if it's not the existing image URL string
+      if (key === 'image' && typeof editingService[key] === 'string') return;
+      if (editingService[key] !== null) formData.append(key, editingService[key]);
+    });
+
+    try {
+      await axios.patch(`http://127.0.0.1:8000/api/services/${editingService.id}/`, formData, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+      });
+      setShowEditService(false);
+      fetchData();
+    } catch (err) {
+      alert("Failed to update service");
+    }
+  };
+
   // --- RENDERING HELPERS ---
 
   return (
@@ -235,7 +281,7 @@ const AdminDashboard = () => {
                           <td className="p-6 text-xs text-white/30">Pos: {item.order}</td>
                           <td className="p-6 text-right">
                             <div className="flex justify-end gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button onClick={() => { setEditingService(item); setShowEditService(true); }} className="text-luxury-gold hover:text-white"><Pencil size={18} /></button>
+                              <button aria-label="pencil" onClick={() => { setEditingService(item); setShowEditService(true); }} className="text-luxury-gold hover:text-white"><Pencil size={18} /></button>
                               <button onClick={() => handleDelete(item.id, 'service')} className="text-white/20 hover:text-red-500"><Trash2 size={18} /></button>
                             </div>
                           </td>
@@ -250,7 +296,51 @@ const AdminDashboard = () => {
         </div>
         
         {/* Modals for Add/Edit Service go here (Keep your existing modal code) */}
-        
+        {/* MODAL: ADD SERVICE */}
+        {showAddService && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+            <div className="bg-luxury-black border border-white/10 p-10 w-full max-w-xl relative">
+              <button onClick={() => setShowAddService(false)} className="absolute top-6 right-6 text-white/30 hover:text-white"><X /></button>
+              <h2 className="text-2xl font-serif mb-8 text-center">New Service</h2>
+              <form onSubmit={handleAddService} className="grid grid-cols-2 gap-6">
+                <div className="col-span-2">
+                  <input placeholder="Title" required className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setNewService({...newService, title: e.target.value})} />
+                </div>
+                <input placeholder="Price" className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setNewService({...newService, price: e.target.value})} />
+                <input placeholder="Duration (HH:MM:SS)" className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setNewService({...newService, duration: e.target.value})} />
+                <div className="col-span-2">
+                  <input type="file" accept="image/*" className="text-xs" onChange={e => setNewService({...newService, image: e.target.files[0]})} />
+                </div>
+                <textarea placeholder="Description" rows="3" className="col-span-2 w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setNewService({...newService, description: e.target.value})} />
+                <button type="submit" className="col-span-2 bg-luxury-gold text-black py-4 font-bold uppercase text-[10px]">Create Service</button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: EDIT SERVICE */}
+        {showEditService && editingService && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+            <div className="bg-luxury-black border border-white/10 p-10 w-full max-w-xl relative">
+              <button onClick={() => setShowEditService(false)} className="absolute top-6 right-6 text-white/30 hover:text-white"><X /></button>
+              <h2 className="text-2xl font-serif mb-8 text-center">Edit {editingService.title}</h2>
+              <form onSubmit={handleUpdateService} className="grid grid-cols-2 gap-6">
+                <div className="col-span-2">
+                  <input value={editingService?.title || ''} required className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setEditingService({...editingService, title: e.target.value})} />
+                </div>
+                <input value={editingService.price} className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setEditingService({...editingService, price: e.target.value})} />
+                <input value={editingService.duration} className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setEditingService({...editingService, duration: e.target.value})} />
+                <div className="col-span-2">
+                  <p className="text-[9px] text-luxury-gold uppercase mb-2">New Image (Optional)</p>
+                  <input type="file" accept="image/*" className="text-xs" onChange={e => setEditingService({...editingService, image: e.target.files[0]})} />
+                </div>
+                <textarea value={editingService.description} rows="3" className="col-span-2 w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setEditingService({...editingService, description: e.target.value})} />
+                <button type="submit" className="col-span-2 bg-luxury-gold text-black py-4 font-bold uppercase text-[10px]">Save Changes</button>
+              </form>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

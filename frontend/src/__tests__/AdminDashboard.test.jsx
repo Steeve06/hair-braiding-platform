@@ -46,23 +46,30 @@ describe('AdminDashboard Simplified Test', () => {
       image: 'http://localhost/test.jpg' 
     };
     
+    // Mock the API response
     axios.get.mockResolvedValue({ data: [mockService] });
 
-    render(<BrowserRouter><AdminDashboard /></BrowserRouter>);
+    render(
+      <BrowserRouter>
+        <AdminDashboard />
+      </BrowserRouter>
+    );
 
-    // Wait for data to load
-    await waitFor(() => {
-      expect(screen.queryByText(/Loading Secure Data/i)).not.toBeInTheDocument();
-    });
+    // 1. Switch to Services Tab
+    const servicesTab = screen.getByRole('button', { name: /services/i });
+    fireEvent.click(servicesTab);
 
-    // Switch to services tab
-    fireEvent.click(screen.getByRole('button', { name: /services/i }));
-
-    // Find and click the Edit (Pencil) button
-    const editButton = await screen.findByRole('button', { name: /pencil/i })
-      .catch(() => screen.getAllByRole('button').find(btn => btn.innerHTML.includes('svg')));
+    // 2. Wait for the Service to appear and find the pencil
+    const editButton = await screen.findByRole('button', { name: /pencil/i });
     
+    // 3. Click the button
     fireEvent.click(editButton);
 
+    // 4. Use waitFor to ensure the Modal is fully visible and state is updated
+    await waitFor(() => {
+      // We look for the input specifically to ensure it's the one with the value
+      const titleInput = screen.getByDisplayValue('Luxury Braids');
+      expect(titleInput).toBeInTheDocument();
+    }, { timeout: 2000 }); // Give it extra time for the modal transition
   });
 });
