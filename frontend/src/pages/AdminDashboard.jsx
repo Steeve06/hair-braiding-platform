@@ -2,24 +2,41 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { Plus, Trash2, CheckCircle, Clock, X, Pencil, LayoutDashboard, Calendar } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Clock, X, Pencil, LayoutDashboard, Calendar, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('bookings');
-  const [data, setData] = useState([]);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('refreshToken')
+    navigate('/');
+  };
+
+  // --- STATE MANAGEMENT ---
+  const [activeTab, setActiveTab] = useState('bookings'); // Toggle between 'bookings' and 'services' view
+  const [data, setData] = useState([]); // Holds current list of records from backend
   const [isLoading, setIsLoading] = useState(true);
   
-  // Modal States
+  // Modal Visibility States
   const [showAddService, setShowAddService] = useState(false);
   const [showEditService, setShowEditService] = useState(false);
   
-  // Data States
+  // Form Data States
   const [editingService, setEditingService] = useState(null);
   const [newService, setNewService] = useState({
     title: '', description: '', price: '', duration: '', image: null, order: 0
   });
 
-  // 1. Fetch Data from Django
+  // --- API LOGIC ---
+
+  /**
+   * 1. FETCH DATA
+   * Retrieves bookings or services based on the active tab.
+   * Requires JWT token for authorization.
+   */
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     const token = localStorage.getItem('adminToken');
@@ -40,66 +57,35 @@ const AdminDashboard = () => {
     fetchData();
   }, [fetchData]);
 
-  // 2. Add New Service
-  const handleAddService = async (e) => {
-    e.preventDefault();
+  /**
+   * 2. UPDATE BOOKING STATUS
+   * Sends a PATCH request to update 'pending' bookings to 'confirmed' or 'rejected'.
+   */
+  const handleUpdateStatus = async (id, newStatus) => {
     const token = localStorage.getItem('adminToken');
-    const formData = new FormData();
-    
-    Object.keys(newService).forEach(key => {
-      if (newService[key] !== null) formData.append(key, newService[key]);
-    });
-
     try {
-      await axios.post('http://127.0.0.1:8000/api/services/', formData, {
-        headers: { 
-          Authorization: `Bearer ${token}`, 
-          'Content-Type': 'multipart/form-data' 
-        }
-      });
-      setShowAddService(false);
-      setNewService({ title: '', description: '', price: '', duration: '', image: null, order: 0 });
-      fetchData();
-    } catch (err) {
-      alert("Error adding service: " + JSON.stringify(err.response?.data));
+      await axios.patch(
+        `http://127.0.0.1:8000/api/bookings/${id}/status/`, 
+        { status: newStatus },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // Update UI locally to reflect the change immediately
+      setData(prevData => prevData.map(item => 
+        item.id === id ? { ...item, status: newStatus } : item
+      ));
+      
+      alert(`Booking ${newStatus} successfully.`);
+    } catch (err) { 
+      console.error("Status update failed", err);
+      alert("Failed to update status.");
     }
   };
 
-  // 3. Update Existing Service
-  const handleUpdateService = async (e) => {
-    e.preventDefault();
-    if (!editingService?.id) return;
-
-    const token = localStorage.getItem('adminToken');
-    const formData = new FormData();
-    
-    formData.append('title', editingService.title);
-    formData.append('description', editingService.description);
-    formData.append('price', editingService.price);
-    formData.append('duration', editingService.duration);
-    formData.append('order', editingService.order);
-
-    // Only append image if it's a new File object (not the existing URL string)
-    if (editingService.image && typeof editingService.image !== 'string') {
-      formData.append('image', editingService.image);
-    }
-
-    try {
-      await axios.patch(`http://127.0.0.1:8000/api/services/${editingService.id}/`, formData, {
-        headers: { 
-          Authorization: `Bearer ${token}`, 
-          'Content-Type': 'multipart/form-data' 
-        }
-      });
-      setShowEditService(false);
-      setEditingService(null);
-      fetchData();
-    } catch (err) {
-      alert("Update failed: " + JSON.stringify(err.response?.data));
-    }
-  };
-
-  // 4. Delete Action
+  /**
+   * 3. DELETE RECORD
+   * Removes a booking or service permanently from the database.
+   */
   const handleDelete = async (id, type) => {
     if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
     const token = localStorage.getItem('adminToken');
@@ -108,32 +94,32 @@ const AdminDashboard = () => {
       await axios.delete(`http://127.0.0.1:8000/api/${endpoint}/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      fetchData();
+      fetchData(); // Refresh list after deletion
     } catch (err) {
       alert("Delete failed");
     }
   };
 
-  // 5. Update Booking Status
-  const handleUpdateStatus = async (id, status) => {
-    const token = localStorage.getItem('adminToken');
-    try {
-      await axios.patch(`http://127.0.0.1:8000/api/bookings/${id}/`, { status }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      fetchData();
-    } catch (err) { alert("Status update failed"); }
-  };
+  // --- RENDERING HELPERS ---
 
   return (
     <div className="min-h-screen bg-luxury-black pt-32 pb-20 px-6 lg:px-16 text-white">
       <div className="max-w-7xl mx-auto">
         
-        {/* Header */}
+        {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
           <div>
             <h1 className="text-4xl font-serif tracking-wide mb-2">Management Console</h1>
             <p className="text-luxury-gold text-[10px] tracking-[0.3em] uppercase">Control Center • {activeTab}</p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={handleLogout}
+              className="flex items-center gap-2 border border-white/10 text-white/50 px-4 py-3 text-[10px] font-bold tracking-[0.2em] uppercase hover:text-white hover:border-white transition-all"
+            >
+              <LogOut size={14} /> Logout
+            </button>
           </div>
           
           {activeTab === 'services' && (
@@ -146,7 +132,7 @@ const AdminDashboard = () => {
           )}
         </div>
 
-        {/* Tabs */}
+        {/* Tab Navigation */}
         <div className="flex gap-12 border-b border-white/5 mb-8">
           {['bookings', 'services'].map((tab) => (
             <button
@@ -162,7 +148,7 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        {/* Data Table */}
+        {/* Dynamic Data Table */}
         <div className="bg-white/5 border border-white/5 rounded-sm overflow-hidden shadow-2xl">
           {isLoading ? (
             <div className="p-20 text-center text-luxury-gold animate-pulse tracking-widest uppercase text-xs">Loading Secure Data...</div>
@@ -172,7 +158,7 @@ const AdminDashboard = () => {
                 <thead className="bg-white/10 text-luxury-gold text-[9px] tracking-[0.2em] uppercase border-b border-white/5">
                   <tr>
                     {activeTab === 'bookings' ? (
-                      <><th className="p-6">Client</th><th className="p-6">Schedule</th><th className="p-6">Status</th><th className="p-6 text-right">Actions</th></>
+                      <><th className="p-6">Client</th><th className="p-6">Schedule</th><th className="p-6 text-center">Status</th><th className="p-6 text-right">Actions</th></>
                     ) : (
                       <><th className="p-6">Service</th><th className="p-6">Price/Duration</th><th className="p-6">Order</th><th className="p-6 text-right">Actions</th></>
                     )}
@@ -191,21 +177,49 @@ const AdminDashboard = () => {
                             <div className="text-sm">{item.service}</div>
                             <div className="text-[10px] text-white/40 uppercase">{item.date} @ {item.time}</div>
                           </td>
-                          <td className="p-6">
-                            <span className={`px-3 py-1 text-[9px] font-bold tracking-widest uppercase rounded-full ${item.status === 'confirmed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-luxury-gold/10 text-luxury-gold'}`}>
+                          <td className="p-6 text-center">
+                            <span className={`px-3 py-1 text-[9px] font-bold tracking-widest uppercase rounded-full ${
+                                item.status === 'confirmed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 
+                                item.status === 'rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                'bg-luxury-gold/10 text-luxury-gold border border-luxury-gold/20'
+                              }`}>
                               {item.status}
                             </span>
                           </td>
                           <td className="p-6 text-right">
-                            <div className="flex justify-end gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                              {item.status !== 'confirmed' && (
-                                <button onClick={() => handleUpdateStatus(item.id, 'confirmed')} className="text-green-400 hover:text-white"><CheckCircle size={18} /></button>
+                            <div className="flex justify-end gap-3 items-center">
+                              {/* --- MISSING BUTTONS INTEGRATED HERE --- */}
+                              {item.status === 'pending' && (
+                                <div className="flex gap-2 mr-4">
+                                  {/* Accept Button */}
+                                  <button 
+                                    onClick={() => handleUpdateStatus(item.id, 'confirmed')} 
+                                    className="p-2 bg-green-500/10 text-green-400 hover:bg-green-500 hover:text-white rounded-full transition-all"
+                                    title="Accept Booking"
+                                  >
+                                    <CheckCircle size={16} />
+                                  </button>
+                                  {/* Reject Button */}
+                                  <button 
+                                    onClick={() => handleUpdateStatus(item.id, 'rejected')} 
+                                    className="p-2 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-full transition-all"
+                                    title="Reject Booking"
+                                  >
+                                    <X size={16} />
+                                  </button>
+                                </div>
                               )}
-                              <button onClick={() => handleDelete(item.id, 'booking')} className="text-white/20 hover:text-red-500"><Trash2 size={18} /></button>
+                              <button 
+                                onClick={() => handleDelete(item.id, 'booking')} 
+                                className="text-white/20 hover:text-red-500 transition-colors"
+                              >
+                                <Trash2 size={18} />
+                              </button>
                             </div>
                           </td>
                         </>
                       ) : (
+                        // Services Row (Already exists in your file)
                         <>
                           <td className="p-6 flex items-center gap-4">
                             <img src={item.image} alt="" className="w-12 h-12 object-cover border border-white/10 grayscale group-hover:grayscale-0 transition-all" />
@@ -234,52 +248,9 @@ const AdminDashboard = () => {
             </div>
           )}
         </div>
-
-        {/* MODAL: ADD SERVICE */}
-        {showAddService && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-            <div className="bg-luxury-black border border-white/10 p-10 w-full max-w-xl relative">
-              <button onClick={() => setShowAddService(false)} className="absolute top-6 right-6 text-white/30 hover:text-white"><X /></button>
-              <h2 className="text-2xl font-serif mb-8 text-center">New Service</h2>
-              <form onSubmit={handleAddService} className="grid grid-cols-2 gap-6">
-                <div className="col-span-2">
-                  <input placeholder="Title" required className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setNewService({...newService, title: e.target.value})} />
-                </div>
-                <input placeholder="Price" className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setNewService({...newService, price: e.target.value})} />
-                <input placeholder="Duration (HH:MM:SS)" className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setNewService({...newService, duration: e.target.value})} />
-                <div className="col-span-2">
-                  <input type="file" accept="image/*" className="text-xs" onChange={e => setNewService({...newService, image: e.target.files[0]})} />
-                </div>
-                <textarea placeholder="Description" rows="3" className="col-span-2 w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setNewService({...newService, description: e.target.value})} />
-                <button type="submit" className="col-span-2 bg-luxury-gold text-black py-4 font-bold uppercase text-[10px]">Create Service</button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* MODAL: EDIT SERVICE */}
-        {showEditService && editingService && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-            <div className="bg-luxury-black border border-white/10 p-10 w-full max-w-xl relative">
-              <button onClick={() => setShowEditService(false)} className="absolute top-6 right-6 text-white/30 hover:text-white"><X /></button>
-              <h2 className="text-2xl font-serif mb-8 text-center">Edit {editingService.title}</h2>
-              <form onSubmit={handleUpdateService} className="grid grid-cols-2 gap-6">
-                <div className="col-span-2">
-                  <input value={editingService.title} required className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setEditingService({...editingService, title: e.target.value})} />
-                </div>
-                <input value={editingService.price} className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setEditingService({...editingService, price: e.target.value})} />
-                <input value={editingService.duration} className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setEditingService({...editingService, duration: e.target.value})} />
-                <div className="col-span-2">
-                  <p className="text-[9px] text-luxury-gold uppercase mb-2">New Image (Optional)</p>
-                  <input type="file" accept="image/*" className="text-xs" onChange={e => setEditingService({...editingService, image: e.target.files[0]})} />
-                </div>
-                <textarea value={editingService.description} rows="3" className="col-span-2 w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setEditingService({...editingService, description: e.target.value})} />
-                <button type="submit" className="col-span-2 bg-luxury-gold text-black py-4 font-bold uppercase text-[10px]">Save Changes</button>
-              </form>
-            </div>
-          </div>
-        )}
-
+        
+        {/* Modals for Add/Edit Service go here (Keep your existing modal code) */}
+        
       </div>
     </div>
   );

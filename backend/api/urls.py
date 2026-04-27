@@ -3,7 +3,9 @@ from .views import (
     BookingListCreateView,
     BookingDetail,
     ServiceListView, 
-    ServiceDetail
+    ServiceDetail,
+    AvailableSlotsView,
+    UpdateBookingStatusView
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -22,5 +24,10 @@ urlpatterns = [
     #Services
     path('services/', ServiceListView.as_view(), name='service-list'),
     path('services/<int:pk>/', ServiceDetail.as_view(), name='service-detail'),
+    
+    # Available Slots
+    path('available-slots/', AvailableSlotsView.as_view(), name='available-slots'),
+    
+   path('bookings/<int:pk>/status/', UpdateBookingStatusView.as_view(), name='update-status'),
 ]
 

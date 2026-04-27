@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Services from './pages/Services';
 import Booking from './pages/Booking';
 import AdminDashboard from './pages/AdminDashboard';
+import CalendarPage from './pages/CalendarPage';
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('adminToken');
@@ -24,6 +25,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />
           <Route path="/bookings" element={<Booking />} />
+          <Route path="/calendar" element={<CalendarPage />} />
           <Route path='/admin-dashboard' element={
             <ProtectedRoute>
               <AdminDashboard />

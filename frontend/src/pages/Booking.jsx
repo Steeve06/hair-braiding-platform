@@ -1,16 +1,20 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useLocation } from 'react-router-dom'; 
 import { SERVICES } from '../utils/constants';
 
 const Bookings = () => {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
     service: '',
-    date: '',
-    time: '',
+    date: params.get('date') || '',
+    time: params.get('time') || '',
     notes: ''
   });
 
