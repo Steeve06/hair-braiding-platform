@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import dj_database_url
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +27,7 @@ SECRET_KEY = 'django-insecure-s-h_sud24&koxr(#!wwlnl8%ek#4&yze%emjkob3q_-68vd16h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -43,6 +45,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -77,10 +80,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('postgresql://neondb_owner:npg_eNWnpK2dyxF1@ep-summer-shadow-amhrs2iw-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'),
+        conn_max_age=600,
+    )
 }
 
 
@@ -122,8 +125,9 @@ STATIC_URL = 'static/'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173", # Your React dev server
+    "https://styledbymiah.vercel.app",
 ]
-
+CSRF_TRUSTED_ORIGINS = ["https://styledbymiah.vercel.app"]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
