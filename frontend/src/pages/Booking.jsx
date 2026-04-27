@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom'; 
 import { SERVICES } from '../utils/constants';
+import {Turnstile} from '@marsidev/react-turnstile';
 
 const Bookings = () => {
   const location = useLocation();
@@ -20,6 +21,7 @@ const Bookings = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState({ type: '', message: '' });
+  const [token, setToken] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,6 +70,7 @@ const Bookings = () => {
       {/* Booking Form Container */}
       <div className="max-w-2xl mx-auto bg-white/5 p-8 md:p-12 border border-white/5">
         <form onSubmit={handleSubmit} className="space-y-8">
+          <Turnstile siteKey="YOUR_SITE_KEY" onSuccess={(token) => setToken(token)} />
 
           {/* Status Message */}
           {status.message && (
