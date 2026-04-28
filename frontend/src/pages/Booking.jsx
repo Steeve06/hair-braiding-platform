@@ -34,8 +34,7 @@ const Bookings = () => {
     }
 
     setIsLoading(true);
-    setStatus({ type: '', message: '' });
-
+    
     try {
       //point to django backend endpoint for booking creation
       const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
@@ -54,8 +53,10 @@ const Bookings = () => {
         setStatus({ type: 'success', message: 'Booking request submitted successfully! We will contact you soon.' });
       }
     } catch (error) {
-      console.error('Error submitting booking:', error);
-      setStatus({ type: 'error', message: 'Failed to submit booking. Please try again later.' });
+      // This helps you see what the BACKEND is actually complaining about
+      const serverError = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+      console.error('Full Error Detail:', serverError);
+      setStatus({ type: 'error', message: 'Submission failed. Please check your inputs.' });
     } finally {
       setIsLoading(false);
     }

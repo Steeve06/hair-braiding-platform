@@ -9,7 +9,7 @@ class BookingSerializer(serializers.ModelSerializer):
             'id', 'full_name', 'email', 'phone', 'service', 'date', 'time', 'notes', 'created_at', 'status', 
         ]
         
-        read_only_fields = ['id','created_at']
+        read_only_fields = ['id','created_at','status']
         
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
