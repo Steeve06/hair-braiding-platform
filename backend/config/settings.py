@@ -125,16 +125,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://styledbymiah-.*\.vercel\.app$",
+]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173", # Your React dev server
     "https://styledbymiah.vercel.app",
-    "https://styledbymiah-6s76okgv8-steeve06s-projects.vercel.app",
+    "https://styledbymiah-r3xgpbxe2-steeve06s-projects.vercel.app",
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://styledbymiah.vercel.app",
     "https://styledbymiah-6s76okgv8-steeve06s-projects.vercel.app",
+    "https://styledbymiah-r3xgpbxe2-steeve06s-projects.vercel.app",
     "https://backend-styledbymiah.onrender.com"
 ]
 
