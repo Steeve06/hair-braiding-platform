@@ -34,6 +34,7 @@ const Bookings = () => {
     }
 
     setIsLoading(true);
+    setStatus({ type: '', message: '' });
     
     try {
       //point to django backend endpoint for booking creation
@@ -81,10 +82,18 @@ const Bookings = () => {
       {/* Booking Form Container */}
       <div className="max-w-2xl mx-auto bg-white/5 p-8 md:p-12 border border-white/5">
         <form onSubmit={handleSubmit} className="space-y-8">
+         {import.meta.env.VITE_TURNSTILE_SITE_KEY ? (
           <Turnstile 
             siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} 
-            onSuccess={(token) => setToken(token)} 
+            onSuccess={(t) => setToken(t)} 
+            onError={() => setStatus({ type: 'error', message: 'Security check failed to load. Please refresh.' })}
+            options={{
+              theme: 'dark',
+            }}
           />
+        ) : (
+          <p className="text-red-500 text-[10px]">Security configuration missing.</p>
+        )}
 
           {/* Status Message */}
           {status.message && (
