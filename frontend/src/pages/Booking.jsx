@@ -38,8 +38,7 @@ const Bookings = () => {
         service: formData.service,
         date: formData.date,
         time: formData.time,
-        notes: formData.notes,
-        token: token
+        notes: formData.notes
       });
 
       if (response.status === 201) {
