@@ -17,7 +17,7 @@ const Bookings = () => {
     date: params.get('date') || '',
     time: params.get('time') || '',
     notes: '',
-    token: token
+    token: token  || 'test-token'
   });
 
   const [isLoading, setIsLoading] = useState(false);

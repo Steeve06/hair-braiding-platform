@@ -12,6 +12,13 @@ vi.mock('../utils/constants', () => ({
   ]
 }));
 
+vi.mock('@marsidev/react-turnstile', () => ({
+  Turnstile: ({ onSuccess }) => {
+    // Simulate the widget calling onSuccess immediately in tests
+    return <div data-testid="mock-turnstile" onClick={() => onSuccess('mock-token')} />;
+  }
+}));
+
 describe('Bookings Page - Form Element Presence', () => {
   beforeEach(() => {
     // Mock localStorage to prevent environment errors during render
