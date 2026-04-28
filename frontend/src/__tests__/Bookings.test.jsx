@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
+// eslint-disable-next-line no-unused-vars
 import Bookings from '../pages/Booking';
 import '@testing-library/jest-dom';
 
@@ -10,13 +11,6 @@ vi.mock('../utils/constants', () => ({
     { id: 1, title: 'Luxury Braids' },
     { id: 2, title: 'Knotless Braids' }
   ]
-}));
-
-vi.mock('@marsidev/react-turnstile', () => ({
-  Turnstile: ({ onSuccess }) => {
-    // Simulate the widget calling onSuccess immediately in tests
-    return <div data-testid="mock-turnstile" onClick={() => onSuccess('mock-token')} />;
-  }
 }));
 
 describe('Bookings Page - Form Element Presence', () => {
