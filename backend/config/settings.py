@@ -157,12 +157,7 @@ REST_FRAMEWORK = {
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # For Production (Gmail Example):
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'moctosteeve@gmail.com'
-EMAIL_HOST_PASSWORD = 'sbvh meqe gakv oioc' # Use a 16-digit App Password
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # This uses the BASE_DIR we defined at the top of the file
 STATIC_URL = '/static/'
