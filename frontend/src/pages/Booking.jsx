@@ -71,11 +71,10 @@ const Bookings = () => {
       {/* Booking Form Container */}
       <div className="max-w-2xl mx-auto bg-white/5 p-8 md:p-12 border border-white/5">
         <form onSubmit={handleSubmit} className="space-y-8">
-          <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""} onSuccess={(token) => {
-          console.log("Turnstile Token:", token);
-          // Store this token in your formData to send to the backend
-          setFormData({ ...formData, captchaToken: token });
-          }} />
+          <Turnstile 
+            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} 
+            onSuccess={(token) => setToken(token)} 
+          />
 
           {/* Status Message */}
           {status.message && (

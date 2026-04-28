@@ -106,23 +106,35 @@ const AdminDashboard = () => {
    * 4. ADD SERVICE
    */
   const handleAddService = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem('adminToken');
-    const formData = new FormData();
-    Object.keys(newService).forEach(key => {
-      if (newService[key] !== null) formData.append(key, newService[key]);
+  e.preventDefault();
+  const token = localStorage.getItem('adminToken');
+  
+  // 1. Create the FormData object (Required for images)
+  const formData = new FormData();
+  Object.keys(newService).forEach(key => {
+    if (newService[key] !== null) {
+      formData.append(key, newService[key]);
+    }
+  });
+
+  try {
+    // 2. Send the request with the token
+    const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
+    await axios.post(`${API_URL}/api/services/`, formData, {
+      headers: { 
+        Authorization: `Bearer ${token}`, 
+        'Content-Type': 'multipart/form-data' 
+      }
     });
 
-    try {
-      await axios.post(`${API_URL}/api/services/`, formData, {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
-      });
-      setShowAddService(false);
-      fetchData();
-    } catch (err) {
-      alert("Failed to add service");
-    }
-  };
+    // 3. Reset UI on success
+    setShowAddService(false);
+    fetchData(); 
+  } catch (err) {
+    console.error("Add Service Error:", err.response?.data);
+    alert("Failed to add service. Please check your admin permissions.");
+  }
+};
 
   /**
    * 5. UPDATE SERVICE

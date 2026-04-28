@@ -142,6 +142,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://backend-styledbymiah.onrender.com",
     # If using previews often, add the regex-matched domains here too:
     "https://styledbymiah-r3xgpbxe2-steeve06s-projects.vercel.app", 
+    "https://styledbymiah-r3xgpbxe2-steeve06s-projects.vercel.app"
 ]
 
 REST_FRAMEWORK = {
