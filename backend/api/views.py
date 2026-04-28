@@ -67,6 +67,12 @@ class AvailableSlotsView(APIView):
 class BookingListCreateView(generics.ListCreateAPIView):
     queryset = Booking.objects.all().order_by('-created_at')
     serializer_class = BookingSerializer
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            print(serializer.errors) # This will show in your Render logs
+            return Response(serializer.errors, status=400)
+        return super().post(request, *args, **kwargs)
 
 class BookingDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Booking.objects.all()

@@ -153,11 +153,17 @@ REST_FRAMEWORK = {
 }
 
 
-# For Development: This prints the email to your terminal instead of sending it
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    # On Render, you need an actual SMTP provider (SendGrid, Mailgun, Gmail)
+    # If you don't have one yet, keep it as console or use a dummy file backend to prevent 500 errors
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' 
 
-# For Production (Gmail Example):
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Add this to prevent the app from crashing if email fails
+EMAIL_FAIL_SILENTLY = True
+
+
 
 # This uses the BASE_DIR we defined at the top of the file
 STATIC_URL = '/static/'

@@ -16,8 +16,10 @@ const Bookings = () => {
     service: '',
     date: params.get('date') || '',
     time: params.get('time') || '',
-    notes: '',
+    notes: ''
   });
+
+  
 
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState({ type: '', message: '' });
@@ -25,6 +27,12 @@ const Bookings = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!token) {
+      setStatus({ type: 'error', message: 'Please complete the security check.' });
+      return;
+    }
+
     setIsLoading(true);
     setStatus({ type: '', message: '' });
 
@@ -38,7 +46,8 @@ const Bookings = () => {
         service: formData.service,
         date: formData.date,
         time: formData.time,
-        notes: formData.notes
+        notes: formData.notes,
+        turnstile_token: token
       });
 
       if (response.status === 201) {
