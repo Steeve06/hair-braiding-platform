@@ -125,20 +125,23 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
+import re
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "https://styledbymiah.vercel.app",
+]
+
+# This automatically trusts ANY Vercel preview link for your project
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://styledbymiah-.*\.vercel\.app$",
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173", # Your React dev server
-    "https://styledbymiah.vercel.app",
-    "https://styledbymiah-r3xgpbxe2-steeve06s-projects.vercel.app",
-]
 CSRF_TRUSTED_ORIGINS = [
     "https://styledbymiah.vercel.app",
-    "https://styledbymiah-6s76okgv8-steeve06s-projects.vercel.app",
-    "https://styledbymiah-r3xgpbxe2-steeve06s-projects.vercel.app",
-    "https://backend-styledbymiah.onrender.com"
+    "https://backend-styledbymiah.onrender.com",
+    # If using previews often, add the regex-matched domains here too:
+    "https://styledbymiah-r3xgpbxe2-steeve06s-projects.vercel.app", 
 ]
 
 REST_FRAMEWORK = {

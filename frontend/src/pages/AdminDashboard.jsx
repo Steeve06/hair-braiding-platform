@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
@@ -64,7 +65,6 @@ const AdminDashboard = () => {
    */
   const handleUpdateStatus = async (id, newStatus) => {
     const token = localStorage.getItem('adminToken');
-    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
     try {
       await axios.patch(
         `${API_URL}/api/bookings/${id}/status/`,
@@ -91,7 +91,6 @@ const AdminDashboard = () => {
   const handleDelete = async (id, type) => {
     if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
     const token = localStorage.getItem('adminToken');
-    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
     try {
       const endpoint = type === 'booking' ? 'bookings' : 'services';
       await axios.delete(`${API_URL}/api/${endpoint}/${id}/`, {
@@ -109,7 +108,6 @@ const AdminDashboard = () => {
   const handleAddService = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('adminToken');
-    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
     const formData = new FormData();
     Object.keys(newService).forEach(key => {
       if (newService[key] !== null) formData.append(key, newService[key]);
@@ -132,7 +130,6 @@ const AdminDashboard = () => {
   const handleUpdateService = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('adminToken');
-    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
     const formData = new FormData();
     Object.keys(editingService).forEach(key => {
       // Only append if it's not the existing image URL string
