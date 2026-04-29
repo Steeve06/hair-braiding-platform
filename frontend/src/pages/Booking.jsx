@@ -2,12 +2,28 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom'; 
-import { SERVICES } from '../utils/constants';
+import { SERVICES as STATIC_SERVICES} from '../utils/constants';
 import {Turnstile} from '@marsidev/react-turnstile';
 
 const Bookings = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
+  const [SERVICES, setSERVICES] = useState(STATIC_SERVICES);
+  
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
+        const response = await axios.get(`${API_URL}/api/services/`);
+        // If the admin has added services, use them; otherwise, fallback to constants
+        setSERVICES(response.data.length > 0 ? response.data : STATIC_SERVICES);
+      } catch (error) {
+        console.error("Error fetching services:", error);
+        setSERVICES(STATIC_SERVICES); // Fallback on error
+      }
+    };
+    fetchServices();
+  }, []);
   
   const [formData, setFormData] = useState({
     fullName: '',
