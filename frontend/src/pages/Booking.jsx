@@ -8,11 +8,10 @@ import { Turnstile } from '@marsidev/react-turnstile';
 const Bookings = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  
   const [SERVICES, setSERVICES] = useState(STATIC_SERVICES);
   
   const [formData, setFormData] = useState({
-    fullName: '',
+    fullName: params.get('name') || '',
     email: '',
     phone: '',
     service: params.get('service') || '',
@@ -30,9 +29,7 @@ const Bookings = () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
         const response = await axios.get(`${API_URL}/api/services/`);
-        if (response.data && response.data.length > 0) {
-          setSERVICES(response.data);
-        }
+        if (response.data && response.data.length > 0) setSERVICES(response.data);
       } catch (error) {
         console.error("Error fetching services:", error);
       }
@@ -41,8 +38,8 @@ const Bookings = () => {
   }, []);
 
   const handleChange = (e) => {
-    const { id, value, name } = e.target;
-    const field = name || id; 
+    const { name, value, id } = e.target;
+    const field = name || id;
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -58,7 +55,8 @@ const Bookings = () => {
     
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
-      await axios.post(`${API_URL}/api/bookings/`, {
+      
+      const payload = {
         full_name: formData.fullName,
         email: formData.email,
         phone: formData.phone,
@@ -67,35 +65,43 @@ const Bookings = () => {
         time: formData.time,
         notes: formData.notes,
         turnstile_token: token
-      });
-      setStatus({ type: 'success', message: 'Booking request submitted successfully!' });
-      setFormData({ fullName: '', email: '', phone: '', service: '', date: '', time: '', notes: '' });
-      setToken(null);
+      };
+
+      const response = await axios.post(`${API_URL}/api/bookings/`, payload);
+
+      if (response.status === 201 || response.status === 200) {
+        setStatus({ type: 'success', message: 'Booking request submitted successfully!' });
+        setFormData({ fullName: '', email: '', phone: '', service: '', date: '', time: '', notes: '' });
+        setToken(null);
+      }
     } catch (error) {
-      setStatus({ type: 'error', message: 'Submission failed.' });
+      const errorMsg = error.response?.data ? JSON.stringify(error.response.data) : 'Server Error';
+      console.error("Submission Error:", errorMsg);
+      setStatus({ type: 'error', message: 'Submission failed. Please try again.' });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const inputClasses = "w-full bg-black/40 border border-white/10 px-4 py-3 text-white outline-none transition-colors duration-300";
+  const inputClasses = "w-full bg-black/40 border border-white/10 px-4 py-3 text-white outline-none focus:border-luxury-gold transition-all";
   const labelClasses = "block text-[10px] tracking-[0.2em] text-luxury-gold uppercase mb-2 font-medium";
 
   return (
     <div className="bg-luxury-black min-h-screen pt-32 pb-20 px-6">
-      <div className="text-center mb-16">
-        <span className="text-luxury-gold text-[10px] tracking-[0.4em] uppercase mb-4 block">— Reserve Your Slot —</span>
-        <h1 className="text-5xl md:text-6xl font-serif text-white tracking-wide">Book Appointment</h1>
-      </div>
-
-      <div className="max-w-2xl mx-auto bg-white/5 p-8 md:p-12 border border-white/5">
+      <div className="max-w-2xl mx-auto bg-white/5 p-8 border border-white/5">
         <form onSubmit={handleSubmit} className="space-y-8">
-          {import.meta.env.VITE_TURNSTILE_SITE_KEY && (
-            <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} onSuccess={(t) => setToken(t)} options={{ theme: 'dark' }} />
-          )}
+          <div className="mb-6">
+            {import.meta.env.VITE_TURNSTILE_SITE_KEY && (
+              <Turnstile 
+                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} 
+                onSuccess={(t) => setToken(t)} 
+                options={{ theme: 'dark' }} 
+              />
+            )}
+          </div>
 
           {status.message && (
-            <div role="alert" className={`p-4 border ${status.type === 'success' ? 'border-luxury-gold text-luxury-gold' : 'border-red-500 text-red-500'}`}>
+            <div className={`p-4 border text-xs tracking-widest uppercase text-center ${status.type === 'success' ? 'border-luxury-gold text-luxury-gold' : 'border-red-500 text-red-500'}`}>
               {status.message}
             </div>
           )}
@@ -142,14 +148,14 @@ const Bookings = () => {
 
           <div>
             <label htmlFor="notes" className={labelClasses}>Special Requests</label>
-            <textarea id="notes" name="notes" rows="4" value={formData.notes} className={inputClasses} onChange={handleChange} placeholder="Hair length, desired extensions, link to reference photos, etc." />
+            <textarea id="notes" name="notes" rows="4" value={formData.notes} className={inputClasses} onChange={handleChange} placeholder="Any specific details..." />
           </div>
 
-          <button type="submit" disabled={isLoading} className="w-full py-4 bg-luxury-gold text-black uppercase font-bold tracking-widest">
+          <button type="submit" disabled={isLoading} className="w-full py-4 bg-luxury-gold text-black uppercase font-bold tracking-widest hover:bg-white transition-colors">
             {isLoading ? 'Processing...' : 'Submit Booking Request'}
           </button>
           
-          <p className="text-[10px] text-white/30 text-center mt-6 tracking-widest leading-relaxed">
+          <p className="text-[10px] text-white/30 text-center mt-6 tracking-widest">
             A $25 deposit may be required to secure your slot. We'll reach out within 24 hours to confirm.
           </p>
         </form>
