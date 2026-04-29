@@ -9,7 +9,7 @@ const Bookings = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   
-  // Keep variable name as requested, but initialized with static constants
+  // State for services, initialized with static constants
   const [SERVICES, setSERVICES] = useState(STATIC_SERVICES);
   
   const [formData, setFormData] = useState({
@@ -22,18 +22,21 @@ const Bookings = () => {
     notes: ''
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState({ type: '', message: '' });
+  const [token, setToken] = useState(null);
+
   useEffect(() => {
     const fetchServices = async () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
         const response = await axios.get(`${API_URL}/api/services/`);
-        // If the admin has added services, use them; otherwise, fallback to constants
         if (response.data && response.data.length > 0) {
           setSERVICES(response.data);
         }
       } catch (error) {
         console.error("Error fetching services:", error);
-        setSERVICES(STATIC_SERVICES); 
+        // Fallback already set via useState(STATIC_SERVICES)
       }
     };
     fetchServices();
@@ -41,17 +44,12 @@ const Bookings = () => {
 
   const handleChange = (e) => {
     const { id, value, name } = e.target;
-    const field = id || name; 
+    const field = name || id; 
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState({ type: '', message: '' });
-  const [token, setToken] = useState(null);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!token) {
       setStatus({ type: 'error', message: 'Please complete the security check.' });
       return;
@@ -74,16 +72,8 @@ const Bookings = () => {
       });
 
       if (response.status === 201) {
-        setStatus({ type: 'success', message: 'Booking request submitted successfully! We will contact you soon.' });
-        setFormData({
-          fullName: '',
-          email: '',
-          phone: '',
-          service: '',
-          date: '',
-          time: '',
-          notes: ''
-        });
+        setStatus({ type: 'success', message: 'Booking request submitted successfully!' });
+        setFormData({ fullName: '', email: '', phone: '', service: '', date: '', time: '', notes: '' });
         setToken(null);
       }
     } catch (error) {
@@ -99,26 +89,21 @@ const Bookings = () => {
   return (
     <div className="bg-luxury-black min-h-screen pt-32 pb-20 px-6">
       <div className="text-center mb-16">
-        <span className="text-luxury-gold text-[10px] tracking-[0.4em] uppercase mb-4 block">
-          — Reserve Your Slot —
-        </span>
-        <h1 className="text-5xl md:text-6xl font-serif text-white tracking-wide">
-          Book Appointment
-        </h1>
+        <span className="text-luxury-gold text-[10px] tracking-[0.4em] uppercase mb-4 block">— Reserve Your Slot —</span>
+        <h1 className="text-5xl md:text-6xl font-serif text-white tracking-wide">Book Appointment</h1>
       </div>
 
       <div className="max-w-2xl mx-auto bg-white/5 p-8 md:p-12 border border-white/5">
         <form onSubmit={handleSubmit} className="space-y-8">
-         {import.meta.env.VITE_TURNSTILE_SITE_KEY ? (
-          <Turnstile 
-            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} 
-            onSuccess={(t) => setToken(t)} 
-            onError={() => setStatus({ type: 'error', message: 'Security check failed to load. Please refresh.' })}
-            options={{ theme: 'dark' }}
-          />
-        ) : (
-          <p className="text-red-500 text-[10px]">Security configuration missing.</p>
-        )}
+          {import.meta.env.VITE_TURNSTILE_SITE_KEY ? (
+            <Turnstile 
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} 
+              onSuccess={(t) => setToken(t)} 
+              options={{ theme: 'dark' }}
+            />
+          ) : (
+            <p className="text-red-500 text-[10px]">Security configuration missing.</p>
+          )}
 
           {status.message && (
             <div className={`p-4 text-[11px] tracking-widest text-center uppercase border ${
@@ -130,61 +115,25 @@ const Bookings = () => {
           
           <div>
             <label htmlFor="fullName" className={labelClasses}>Full Name</label>
-            <input 
-              id="fullName" 
-              name="fullName"
-              type="text" 
-              value={formData.fullName}
-              onChange={handleChange}
-              placeholder="Your full name"
-              className={inputClasses}
-              required
-            />
+            <input id="fullName" name="fullName" type="text" value={formData.fullName} onChange={handleChange} placeholder="Your full name" className={inputClasses} required />
           </div>
 
           <div>
             <label htmlFor="email" className={labelClasses}>Email Address</label>
-            <input 
-              id="email"
-              name="email"
-              type="email" 
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="you@email.com"
-              className={inputClasses}
-              required
-            />
+            <input id="email" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="you@email.com" className={inputClasses} required />
           </div>
 
           <div>
             <label htmlFor="phone" className={labelClasses}>Phone Number</label>
-            <input 
-              id="phone"
-              name="phone"
-              type="tel" 
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="(000) 000-0000"
-              className={inputClasses}
-              required
-            />
+            <input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} placeholder="(000) 000-0000" className={inputClasses} required />
           </div>
 
           <div>
-            <label htmlFor="service-select" className={labelClasses}>Service</label>
-            <select
-              id="service" 
-              name="service"
-              value={formData.service}
-              className={`${inputClasses} appearance-none cursor-pointer`}
-              onChange={handleChange}
-              required
-            >
+            <label htmlFor="service" className={labelClasses}>Service</label>
+            <select id="service" name="service" value={formData.service} className={`${inputClasses} appearance-none cursor-pointer`} onChange={handleChange} required >
               <option value="">Select a service...</option>
               {SERVICES.map(s => (
-                <option key={s.id} value={s.title} className="bg-black text-white">
-                    {s.title}
-                </option>
+                <option key={s.id} value={s.title} className="bg-black text-white">{s.title}</option>
               ))}
             </select>
           </div>
@@ -192,60 +141,27 @@ const Bookings = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <label htmlFor="date" className={labelClasses}>Preferred Date</label>
-              <input 
-                id="date"
-                type="date" 
-                name="date"
-                value={formData.date}
-                className={inputClasses}
-                onChange={handleChange}
-                required
-              />
+              <input id="date" name="date" type="date" value={formData.date} className={inputClasses} onChange={handleChange} required />
             </div>
             <div>
               <label htmlFor="time" className={labelClasses}>Preferred Time</label>
-              <select 
-                id="time"
-                name="time"
-                value={formData.time}
-                className={`${inputClasses} appearance-none cursor-pointer`}
-                onChange={handleChange}
-                required
-              >
+              <select id="time" name="time" value={formData.time} className={`${inputClasses} appearance-none cursor-pointer`} onChange={handleChange} required >
                 <option value="">Select a time...</option>
-                <option value="09:00" className="bg-black text-white">09:00 AM</option>
-                <option value="12:00" className="bg-black text-white">12:00 PM</option>
-                <option value="15:00" className="bg-black text-white">03:00 PM</option>
+                <option value="09:00">09:00 AM</option>
+                <option value="12:00">12:00 PM</option>
+                <option value="15:00">03:00 PM</option>
               </select>
             </div>
           </div>
 
           <div>
             <label htmlFor="notes" className={labelClasses}>Special Requests</label>
-            <textarea 
-              id="notes"
-              name="notes"
-              rows="4"
-              value={formData.notes}
-              placeholder="Hair length, desired extensions, link to reference photos, etc."
-              className={inputClasses}
-              onChange={handleChange}
-            />
+            <textarea id="notes" name="notes" rows="4" value={formData.notes} placeholder="Hair length, desired extensions..." className={inputClasses} onChange={handleChange} />
           </div>
 
-          <div className="pt-4">
-            <button 
-              type="submit"
-              disabled={isLoading}
-              className={`w-full py-4 text-[11px] font-bold tracking-[0.3em] uppercase transition-colors duration-500 ${
-                isLoading 
-                ? 'bg-gray-600 text-black cursor-not-allowed' 
-                : 'bg-luxury-gold text-black hover:bg-white'
-              }`}
-            >
-              {isLoading ? 'Processing...' : 'Submit Booking Request'}
-            </button>
-          </div>
+          <button type="submit" disabled={isLoading} className={`w-full py-4 text-[11px] font-bold tracking-[0.3em] uppercase transition-colors duration-500 ${isLoading ? 'bg-gray-600 text-black' : 'bg-luxury-gold text-black hover:bg-white'}`}>
+            {isLoading ? 'Processing...' : 'Submit Booking Request'}
+          </button>
         </form>
       </div>
     </div>
