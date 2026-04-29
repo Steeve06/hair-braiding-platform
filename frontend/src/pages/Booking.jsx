@@ -9,7 +9,6 @@ const Bookings = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   
-  // State for services, initialized with static constants
   const [SERVICES, setSERVICES] = useState(STATIC_SERVICES);
   
   const [formData, setFormData] = useState({
@@ -36,7 +35,6 @@ const Bookings = () => {
         }
       } catch (error) {
         console.error("Error fetching services:", error);
-        // Fallback already set via useState(STATIC_SERVICES)
       }
     };
     fetchServices();
@@ -60,7 +58,7 @@ const Bookings = () => {
     
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
-      const response = await axios.post(`${API_URL}/api/bookings/`, {
+      await axios.post(`${API_URL}/api/bookings/`, {
         full_name: formData.fullName,
         email: formData.email,
         phone: formData.phone,
@@ -70,71 +68,53 @@ const Bookings = () => {
         notes: formData.notes,
         turnstile_token: token
       });
-
-      if (response.status === 201) {
-        setStatus({ type: 'success', message: 'Booking request submitted successfully!' });
-        setFormData({ fullName: '', email: '', phone: '', service: '', date: '', time: '', notes: '' });
-        setToken(null);
-      }
+      setStatus({ type: 'success', message: 'Booking request submitted successfully!' });
+      setFormData({ fullName: '', email: '', phone: '', service: '', date: '', time: '', notes: '' });
+      setToken(null);
     } catch (error) {
-      setStatus({ type: 'error', message: 'Submission failed. Please check your inputs.' });
+      setStatus({ type: 'error', message: 'Submission failed.' });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const inputClasses = "w-full bg-black/40 border border-white/10 px-4 py-3 text-white focus:border-luxury-gold outline-none transition-colors duration-300 placeholder:text-white/20";
-  const labelClasses = "block text-[10px] tracking-[0.2em] text-luxury-gold uppercase mb-2 font-medium";
+  const inputClasses = "w-full bg-black/40 border border-white/10 px-4 py-3 text-white outline-none";
+  const labelClasses = "block text-[10px] tracking-[0.2em] text-luxury-gold uppercase mb-2";
 
   return (
     <div className="bg-luxury-black min-h-screen pt-32 pb-20 px-6">
-      <div className="text-center mb-16">
-        <span className="text-luxury-gold text-[10px] tracking-[0.4em] uppercase mb-4 block">— Reserve Your Slot —</span>
-        <h1 className="text-5xl md:text-6xl font-serif text-white tracking-wide">Book Appointment</h1>
-      </div>
-
-      <div className="max-w-2xl mx-auto bg-white/5 p-8 md:p-12 border border-white/5">
+      <div className="max-w-2xl mx-auto bg-white/5 p-8 border border-white/5">
         <form onSubmit={handleSubmit} className="space-y-8">
-          {import.meta.env.VITE_TURNSTILE_SITE_KEY ? (
-            <Turnstile 
-              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} 
-              onSuccess={(t) => setToken(t)} 
-              options={{ theme: 'dark' }}
-            />
-          ) : (
-            <p className="text-red-500 text-[10px]">Security configuration missing.</p>
+          {import.meta.env.VITE_TURNSTILE_SITE_KEY && (
+            <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} onSuccess={(t) => setToken(t)} options={{ theme: 'dark' }} />
           )}
 
           {status.message && (
-            <div className={`p-4 text-[11px] tracking-widest text-center uppercase border ${
-              status.type === 'success' ? 'border-luxury-gold text-luxury-gold' : 'border-red-500 text-red-500'
-            }`}>
+            <div className={`p-4 border ${status.type === 'success' ? 'border-luxury-gold text-luxury-gold' : 'border-red-500 text-red-500'}`}>
               {status.message}
             </div>
           )}
           
           <div>
             <label htmlFor="fullName" className={labelClasses}>Full Name</label>
-            <input id="fullName" name="fullName" type="text" value={formData.fullName} onChange={handleChange} placeholder="Your full name" className={inputClasses} required />
+            <input id="fullName" name="fullName" type="text" value={formData.fullName} onChange={handleChange} className={inputClasses} required />
           </div>
 
           <div>
             <label htmlFor="email" className={labelClasses}>Email Address</label>
-            <input id="email" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="you@email.com" className={inputClasses} required />
+            <input id="email" name="email" type="email" value={formData.email} onChange={handleChange} className={inputClasses} required />
           </div>
 
           <div>
             <label htmlFor="phone" className={labelClasses}>Phone Number</label>
-            <input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} placeholder="(000) 000-0000" className={inputClasses} required />
+            <input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} className={inputClasses} required />
           </div>
 
           <div>
             <label htmlFor="service" className={labelClasses}>Service</label>
-            <select id="service" name="service" value={formData.service} className={`${inputClasses} appearance-none cursor-pointer`} onChange={handleChange} required >
+            <select id="service" name="service" value={formData.service} className={inputClasses} onChange={handleChange} required>
               <option value="">Select a service...</option>
-              {SERVICES.map(s => (
-                <option key={s.id} value={s.title} className="bg-black text-white">{s.title}</option>
-              ))}
+              {SERVICES.map(s => <option key={s.id} value={s.title}>{s.title}</option>)}
             </select>
           </div>
 
@@ -145,7 +125,7 @@ const Bookings = () => {
             </div>
             <div>
               <label htmlFor="time" className={labelClasses}>Preferred Time</label>
-              <select id="time" name="time" value={formData.time} className={`${inputClasses} appearance-none cursor-pointer`} onChange={handleChange} required >
+              <select id="time" name="time" value={formData.time} className={inputClasses} onChange={handleChange} required>
                 <option value="">Select a time...</option>
                 <option value="09:00">09:00 AM</option>
                 <option value="12:00">12:00 PM</option>
@@ -156,12 +136,17 @@ const Bookings = () => {
 
           <div>
             <label htmlFor="notes" className={labelClasses}>Special Requests</label>
-            <textarea id="notes" name="notes" rows="4" value={formData.notes} placeholder="Hair length, desired extensions..." className={inputClasses} onChange={handleChange} />
+            <textarea id="notes" name="notes" rows="4" value={formData.notes} className={inputClasses} onChange={handleChange} placeholder="Hair length, desired extensions, link to reference photos, etc." />
           </div>
 
-          <button type="submit" disabled={isLoading} className={`w-full py-4 text-[11px] font-bold tracking-[0.3em] uppercase transition-colors duration-500 ${isLoading ? 'bg-gray-600 text-black' : 'bg-luxury-gold text-black hover:bg-white'}`}>
+          <button type="submit" disabled={isLoading} className="w-full py-4 bg-luxury-gold text-black uppercase font-bold">
             {isLoading ? 'Processing...' : 'Submit Booking Request'}
           </button>
+          
+          {/* Ensure this text is not broken by other tags like <span> inside */}
+          <p className="text-[10px] text-white/30 text-center mt-6 tracking-widest">
+            A $25 deposit may be required to secure your slot. We'll reach out within 24 hours to confirm.
+          </p>
         </form>
       </div>
     </div>
