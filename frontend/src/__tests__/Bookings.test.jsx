@@ -1,11 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
-// eslint-disable-next-line no-unused-vars
 import Bookings from '../pages/Booking';
 import '@testing-library/jest-dom';
 
-// Mock the constants to ensure the Service dropdown has options to render
+// 1. Mock Turnstile to avoid "sitekey" errors during headless testing
+vi.mock('@marsidev/react-turnstile', () => ({
+  Turnstile: () => <div data-testid="turnstile-mock" />
+}));
+
+// 2. Mock the constants
 vi.mock('../utils/constants', () => ({
   SERVICES: [
     { id: 1, title: 'Luxury Braids' },
@@ -13,9 +17,18 @@ vi.mock('../utils/constants', () => ({
   ]
 }));
 
+// 3. Mock Import Meta for the Turnstile site key check
+vi.stubGlobal('import', {
+  meta: {
+    env: {
+      VITE_TURNSTILE_SITE_KEY: 'mock-key',
+      VITE_API_URL: 'https://test-api.com'
+    }
+  }
+});
+
 describe('Bookings Page - Form Element Presence', () => {
   beforeEach(() => {
-    // Mock localStorage to prevent environment errors during render
     vi.stubGlobal('localStorage', {
       getItem: vi.fn(),
       setItem: vi.fn(),
@@ -35,23 +48,19 @@ describe('Bookings Page - Form Element Presence', () => {
   it('verifies all interactive input fields are present by label', () => {
     renderWithRouter(<Bookings />);
 
-    // Text & Tel Inputs
+    // These match the 'htmlFor' attributes in your JSX
     expect(screen.getByLabelText(/Full Name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Phone Number/i)).toBeInTheDocument();
-
-    // Select Menus
     expect(screen.getByLabelText(/Service/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Preferred Time/i)).toBeInTheDocument();
-
-    // Date Input
     expect(screen.getByLabelText(/Preferred Date/i)).toBeInTheDocument();
   });
 
   it('verifies the Special Requests textarea is present', () => {
     renderWithRouter(<Bookings />);
-    // Since "Special Requests" label doesn't have an 'htmlFor', we find by text/placeholder
-    expect(screen.getByText(/Special Requests/i)).toBeInTheDocument();
+    // Note: This matches because you added id="notes" to the textarea
+    expect(screen.getByLabelText(/Special Requests/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Hair length, desired extensions/i)).toBeInTheDocument();
   });
 
