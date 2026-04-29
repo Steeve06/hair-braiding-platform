@@ -2,18 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom'; 
-import { SERVICES as STATIC_SERVICES } from '../utils/constants';
-import { Turnstile } from '@marsidev/react-turnstile';
+import { SERVICES as STATIC_SERVICES} from '../utils/constants';
+import {Turnstile} from '@marsidev/react-turnstile';
 
 const Bookings = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   
-  const [availableServices, setAvailableServices] = useState(STATIC_SERVICES);
-  const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState({ type: '', message: '' });
-  const [token, setToken] = useState(null);
-
+  // Keep variable name as requested, but initialized with static constants
+  const [SERVICES, setSERVICES] = useState(STATIC_SERVICES);
+  
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -29,33 +27,42 @@ const Bookings = () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
         const response = await axios.get(`${API_URL}/api/services/`);
+        // If the admin has added services, use them; otherwise, fallback to constants
         if (response.data && response.data.length > 0) {
-          setAvailableServices(response.data);
+          setSERVICES(response.data);
         }
       } catch (error) {
         console.error("Error fetching services:", error);
-        // Fallback to static services is already handled by initial state
+        setSERVICES(STATIC_SERVICES); 
       }
     };
     fetchServices();
   }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { id, value, name } = e.target;
+    const field = id || name; 
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState({ type: '', message: '' });
+  const [token, setToken] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!token) {
       setStatus({ type: 'error', message: 'Please complete the security check.' });
       return;
     }
 
     setIsLoading(true);
+    setStatus({ type: '', message: '' });
+    
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
-      await axios.post(`${API_URL}/api/bookings/`, {
+      const response = await axios.post(`${API_URL}/api/bookings/`, {
         full_name: formData.fullName,
         email: formData.email,
         phone: formData.phone,
@@ -65,51 +72,180 @@ const Bookings = () => {
         notes: formData.notes,
         turnstile_token: token
       });
-      setStatus({ type: 'success', message: 'Booking request submitted!' });
-      setFormData({ fullName: '', email: '', phone: '', service: '', date: '', time: '', notes: '' });
+
+      if (response.status === 201) {
+        setStatus({ type: 'success', message: 'Booking request submitted successfully! We will contact you soon.' });
+        setFormData({
+          fullName: '',
+          email: '',
+          phone: '',
+          service: '',
+          date: '',
+          time: '',
+          notes: ''
+        });
+        setToken(null);
+      }
     } catch (error) {
-      setStatus({ type: 'error', message: 'Submission failed.' });
+      setStatus({ type: 'error', message: 'Submission failed. Please check your inputs.' });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const inputClasses = "w-full bg-black/40 border border-white/10 px-4 py-3 text-white focus:border-luxury-gold outline-none transition-colors duration-300";
+  const inputClasses = "w-full bg-black/40 border border-white/10 px-4 py-3 text-white focus:border-luxury-gold outline-none transition-colors duration-300 placeholder:text-white/20";
   const labelClasses = "block text-[10px] tracking-[0.2em] text-luxury-gold uppercase mb-2 font-medium";
 
   return (
     <div className="bg-luxury-black min-h-screen pt-32 pb-20 px-6">
-      <div className="max-w-2xl mx-auto bg-white/5 p-8 border border-white/5">
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Turnstile and Status messages here... */}
+      <div className="text-center mb-16">
+        <span className="text-luxury-gold text-[10px] tracking-[0.4em] uppercase mb-4 block">
+          — Reserve Your Slot —
+        </span>
+        <h1 className="text-5xl md:text-6xl font-serif text-white tracking-wide">
+          Book Appointment
+        </h1>
+      </div>
 
+      <div className="max-w-2xl mx-auto bg-white/5 p-8 md:p-12 border border-white/5">
+        <form onSubmit={handleSubmit} className="space-y-8">
+         {import.meta.env.VITE_TURNSTILE_SITE_KEY ? (
+          <Turnstile 
+            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} 
+            onSuccess={(t) => setToken(t)} 
+            onError={() => setStatus({ type: 'error', message: 'Security check failed to load. Please refresh.' })}
+            options={{ theme: 'dark' }}
+          />
+        ) : (
+          <p className="text-red-500 text-[10px]">Security configuration missing.</p>
+        )}
+
+          {status.message && (
+            <div className={`p-4 text-[11px] tracking-widest text-center uppercase border ${
+              status.type === 'success' ? 'border-luxury-gold text-luxury-gold' : 'border-red-500 text-red-500'
+            }`}>
+              {status.message}
+            </div>
+          )}
+          
           <div>
             <label htmlFor="fullName" className={labelClasses}>Full Name</label>
-            <input id="fullName" name="fullName" type="text" value={formData.fullName} onChange={handleChange} className={inputClasses} required />
+            <input 
+              id="fullName" 
+              name="fullName"
+              type="text" 
+              value={formData.fullName}
+              onChange={handleChange}
+              placeholder="Your full name"
+              className={inputClasses}
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="email" className={labelClasses}>Email Address</label>
+            <input 
+              id="email"
+              name="email"
+              type="email" 
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="you@email.com"
+              className={inputClasses}
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="phone" className={labelClasses}>Phone Number</label>
+            <input 
+              id="phone"
+              name="phone"
+              type="tel" 
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="(000) 000-0000"
+              className={inputClasses}
+              required
+            />
           </div>
 
           <div>
             <label htmlFor="service-select" className={labelClasses}>Service</label>
             <select
-              id="service-select" 
-              name="service" 
+              id="service" 
+              name="service"
               value={formData.service}
-              className={inputClasses}
+              className={`${inputClasses} appearance-none cursor-pointer`}
               onChange={handleChange}
               required
             >
               <option value="">Select a service...</option>
-              {availableServices.map(s => (
-                <option key={s.id} value={s.title}>{s.title}</option>
+              {SERVICES.map(s => (
+                <option key={s.id} value={s.title} className="bg-black text-white">
+                    {s.title}
+                </option>
               ))}
             </select>
           </div>
 
-          {/* Date, Time, and Notes fields... */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <label htmlFor="date" className={labelClasses}>Preferred Date</label>
+              <input 
+                id="date"
+                type="date" 
+                name="date"
+                value={formData.date}
+                className={inputClasses}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="time" className={labelClasses}>Preferred Time</label>
+              <select 
+                id="time"
+                name="time"
+                value={formData.time}
+                className={`${inputClasses} appearance-none cursor-pointer`}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select a time...</option>
+                <option value="09:00" className="bg-black text-white">09:00 AM</option>
+                <option value="12:00" className="bg-black text-white">12:00 PM</option>
+                <option value="15:00" className="bg-black text-white">03:00 PM</option>
+              </select>
+            </div>
+          </div>
 
-          <button type="submit" disabled={isLoading} className="w-full py-4 bg-luxury-gold text-black uppercase tracking-widest font-bold">
-            {isLoading ? 'Processing...' : 'Submit Booking Request'}
-          </button>
+          <div>
+            <label htmlFor="notes" className={labelClasses}>Special Requests</label>
+            <textarea 
+              id="notes"
+              name="notes"
+              rows="4"
+              value={formData.notes}
+              placeholder="Hair length, desired extensions, link to reference photos, etc."
+              className={inputClasses}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="pt-4">
+            <button 
+              type="submit"
+              disabled={isLoading}
+              className={`w-full py-4 text-[11px] font-bold tracking-[0.3em] uppercase transition-colors duration-500 ${
+                isLoading 
+                ? 'bg-gray-600 text-black cursor-not-allowed' 
+                : 'bg-luxury-gold text-black hover:bg-white'
+              }`}
+            >
+              {isLoading ? 'Processing...' : 'Submit Booking Request'}
+            </button>
+          </div>
         </form>
       </div>
     </div>

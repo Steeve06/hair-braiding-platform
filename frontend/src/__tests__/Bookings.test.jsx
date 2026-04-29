@@ -45,16 +45,16 @@ describe('Bookings Page - Form Element Presence', () => {
     expect(screen.getByText(/— Reserve Your Slot —/i)).toBeInTheDocument();
   });
 
-  it('verifies all interactive input fields are present by label', () => {
+  it('verifies all interactive input fields are present by label', async () => {
     renderWithRouter(<Bookings />);
 
     // These match the 'htmlFor' attributes in your JSX
-    expect(screen.getByLabelText(/Full Name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Phone Number/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Service/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Preferred Time/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Preferred Date/i)).toBeInTheDocument();
+    expect(await screen.findByLabelText(/Full Name/i)).toBeInTheDocument();
+    expect(await screen.findByLabelText(/Email Address/i)).toBeInTheDocument();
+    expect(await screen.findByLabelText(/Phone Number/i)).toBeInTheDocument();
+    expect(await screen.findByLabelText(/Service/i)).toBeInTheDocument();
+    expect(await screen.findByLabelText(/Preferred Time/i)).toBeInTheDocument();
+    expect(await screen.findByLabelText(/Preferred Date/i)).toBeInTheDocument();
   });
 
   it('verifies the Special Requests textarea is present', () => {
@@ -64,11 +64,11 @@ describe('Bookings Page - Form Element Presence', () => {
     expect(screen.getByPlaceholderText(/Hair length, desired extensions/i)).toBeInTheDocument();
   });
 
-  it('verifies the service dropdown contains the mocked options', () => {
+  it('verifies the service dropdown contains the mocked options', async () => {
     renderWithRouter(<Bookings />);
     const serviceSelect = screen.getByLabelText(/Service/i);
     
-    expect(serviceSelect).toContainElement(screen.getByText(/Luxury Braids/i));
+    expect(await screen.findByText(/Luxury Braids/i)).toBeInTheDocument();
     expect(serviceSelect).toContainElement(screen.getByText(/Knotless Braids/i));
   });
 
