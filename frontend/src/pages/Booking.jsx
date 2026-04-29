@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom'; 
-import { SERVICES as STATIC_SERVICES} from '../utils/constants';
-import {Turnstile} from '@marsidev/react-turnstile';
+import { SERVICES as STATIC_SERVICES } from '../utils/constants';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 const Bookings = () => {
   const location = useLocation();
@@ -78,19 +78,24 @@ const Bookings = () => {
     }
   };
 
-  const inputClasses = "w-full bg-black/40 border border-white/10 px-4 py-3 text-white outline-none";
-  const labelClasses = "block text-[10px] tracking-[0.2em] text-luxury-gold uppercase mb-2";
+  const inputClasses = "w-full bg-black/40 border border-white/10 px-4 py-3 text-white outline-none transition-colors duration-300";
+  const labelClasses = "block text-[10px] tracking-[0.2em] text-luxury-gold uppercase mb-2 font-medium";
 
   return (
     <div className="bg-luxury-black min-h-screen pt-32 pb-20 px-6">
-      <div className="max-w-2xl mx-auto bg-white/5 p-8 border border-white/5">
+      <div className="text-center mb-16">
+        <span className="text-luxury-gold text-[10px] tracking-[0.4em] uppercase mb-4 block">— Reserve Your Slot —</span>
+        <h1 className="text-5xl md:text-6xl font-serif text-white tracking-wide">Book Appointment</h1>
+      </div>
+
+      <div className="max-w-2xl mx-auto bg-white/5 p-8 md:p-12 border border-white/5">
         <form onSubmit={handleSubmit} className="space-y-8">
           {import.meta.env.VITE_TURNSTILE_SITE_KEY && (
             <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} onSuccess={(t) => setToken(t)} options={{ theme: 'dark' }} />
           )}
 
           {status.message && (
-            <div className={`p-4 border ${status.type === 'success' ? 'border-luxury-gold text-luxury-gold' : 'border-red-500 text-red-500'}`}>
+            <div role="alert" className={`p-4 border ${status.type === 'success' ? 'border-luxury-gold text-luxury-gold' : 'border-red-500 text-red-500'}`}>
               {status.message}
             </div>
           )}
@@ -100,14 +105,15 @@ const Bookings = () => {
             <input id="fullName" name="fullName" type="text" value={formData.fullName} onChange={handleChange} className={inputClasses} required />
           </div>
 
-          <div>
-            <label htmlFor="email" className={labelClasses}>Email Address</label>
-            <input id="email" name="email" type="email" value={formData.email} onChange={handleChange} className={inputClasses} required />
-          </div>
-
-          <div>
-            <label htmlFor="phone" className={labelClasses}>Phone Number</label>
-            <input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} className={inputClasses} required />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <label htmlFor="email" className={labelClasses}>Email Address</label>
+              <input id="email" name="email" type="email" value={formData.email} onChange={handleChange} className={inputClasses} required />
+            </div>
+            <div>
+              <label htmlFor="phone" className={labelClasses}>Phone Number</label>
+              <input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} className={inputClasses} required />
+            </div>
           </div>
 
           <div>
@@ -139,12 +145,11 @@ const Bookings = () => {
             <textarea id="notes" name="notes" rows="4" value={formData.notes} className={inputClasses} onChange={handleChange} placeholder="Hair length, desired extensions, link to reference photos, etc." />
           </div>
 
-          <button type="submit" disabled={isLoading} className="w-full py-4 bg-luxury-gold text-black uppercase font-bold">
+          <button type="submit" disabled={isLoading} className="w-full py-4 bg-luxury-gold text-black uppercase font-bold tracking-widest">
             {isLoading ? 'Processing...' : 'Submit Booking Request'}
           </button>
           
-          {/* Ensure this text is not broken by other tags like <span> inside */}
-          <p className="text-[10px] text-white/30 text-center mt-6 tracking-widest">
+          <p className="text-[10px] text-white/30 text-center mt-6 tracking-widest leading-relaxed">
             A $25 deposit may be required to secure your slot. We'll reach out within 24 hours to confirm.
           </p>
         </form>
