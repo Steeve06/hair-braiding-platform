@@ -88,6 +88,16 @@ const Bookings = () => {
 
   return (
     <div className="bg-luxury-black min-h-screen pt-32 pb-20 px-6">
+      {/* Header Section for Test Presence */}
+      <div className="text-center mb-16">
+        <span className="text-luxury-gold text-[10px] tracking-[0.4em] uppercase mb-4 block">
+          — Reserve Your Slot —
+        </span>
+        <h1 className="text-5xl md:text-6xl font-serif text-white tracking-wide">
+          Book Appointment
+        </h1>
+      </div>
+
       <div className="max-w-2xl mx-auto bg-white/5 p-8 border border-white/5">
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="mb-6">
@@ -155,6 +165,7 @@ const Bookings = () => {
             {isLoading ? 'Processing...' : 'Submit Booking Request'}
           </button>
           
+          {/* Policy Disclaimer */}
           <p className="text-[10px] text-white/30 text-center mt-6 tracking-widest">
             A $25 deposit may be required to secure your slot. We'll reach out within 24 hours to confirm.
           </p>
