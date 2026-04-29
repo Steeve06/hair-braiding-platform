@@ -56,6 +56,11 @@ const Bookings = () => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
       
+      // Ensure date is YYYY-MM-DD
+      const formattedDate = new Date(formData.date).toISOString().split('T')[0];
+      // Ensure time is HH:MM (Django TimeField can be picky about seconds)
+      // If your dropdown values are already "09:00", this just confirms it.
+      const formattedTime = formData.time.length === 5 ? formData.time : formData.time.substring(0, 5);
       const payload = {
         full_name: formData.fullName,
         email: formData.email,
@@ -75,11 +80,11 @@ const Bookings = () => {
         setToken(null);
       }
     } catch (error) {
-      const errorMsg = error.response?.data ? JSON.stringify(error.response.data) : 'Server Error';
-      console.error("Submission Error:", errorMsg);
-      setStatus({ type: 'error', message: 'Submission failed. Please try again.' });
-    } finally {
-      setIsLoading(false);
+      // If Django sends HTML instead of JSON, this will show you the HTML 
+      // which sometimes contains the Python Traceback if DEBUG=True
+      console.error("Full Error Object:", error);
+      console.error("Response Data:", error.response?.data);
+      setStatus({ type: 'error', message: 'Server Error (500). Please check backend logs.' });
     }
   };
 
@@ -152,6 +157,7 @@ const Bookings = () => {
                 <option value="09:00">09:00 AM</option>
                 <option value="12:00">12:00 PM</option>
                 <option value="15:00">03:00 PM</option>
+                <option value="18:00">06:00 PM</option>
               </select>
             </div>
           </div>
