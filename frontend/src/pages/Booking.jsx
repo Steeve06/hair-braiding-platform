@@ -121,47 +121,47 @@ const Bookings = () => {
           
           {/* Full Names */}
           <div>
-            <label htmlFor="full-name" className={labelClasses}>Full Name</label>
+            <label htmlFor="fullName" className={labelClasses}>Full Name</label>
             <input 
               id="fullName" 
               name="fullName"
               type="text" 
               value={formData.fullName}
+              onChange={handleChange}
               placeholder="Your full name"
               className={inputClasses}
-              onChange={handleChange}
               required
             />
           </div>
 
           {/* Email & Phone Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <label htmlFor="email" className={labelClasses}>Email Address</label>
-              <input 
-                id="email"
-                type="email" 
-                name="email"
-                value={formData.email}
-                placeholder="you@email.com"
-                className={inputClasses}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="phone" className={labelClasses}>Phone Number</label>
-              <input 
-                id="phone"
-                type="tel" 
-                name="phone"
-                value={formData.phone}
-                placeholder="(000) 000-0000"
-                className={inputClasses}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="email" className={labelClasses}>Email Address</label>
+            <input 
+              id="email"
+              name="email"
+              type="email" 
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="you@email.com"
+              className={inputClasses}
+              required
+            />
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label htmlFor="phone" className={labelClasses}>Phone Number</label>
+            <input 
+              id="phone"
+              name="phone"
+              type="tel" 
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="(000) 000-0000"
+              className={inputClasses}
+              required
+            />
           </div>
 
           {/* Service Selection */}
@@ -169,6 +169,7 @@ const Bookings = () => {
             <label htmlFor="service-select" className={labelClasses}>Service</label>
             <select
               id="service-select" 
+              name="service"
               value={formData.service}
               className={`${inputClasses} appearance-none cursor-pointer`}
               onChange={handleChange}
@@ -202,7 +203,7 @@ const Bookings = () => {
                 name="time"
                 value={formData.time}
                 className={`${inputClasses} appearance-none cursor-pointer`}
-                onChange={(e) => setFormData({...formData, time: e.target.value})}
+                onChange={handleChange}
                 required
               >
                 <option value="">Select a time...</option>
@@ -215,12 +216,12 @@ const Bookings = () => {
 
           {/* Notes */}
           <div>
-            <label className={labelClasses}>Special Requests</label>
+            <label htmlFor="notes" className={labelClasses}>Special Requests</label>
             <textarea 
-              rows="4"
-              name="notes"
-              value={formData.notes}
               id="notes"
+              name="notes"
+              rows="4"
+              value={formData.notes}
               placeholder="Hair length, desired extensions, link to reference photos, etc."
               className={inputClasses}
               onChange={handleChange}
