@@ -13,13 +13,18 @@ const Bookings = () => {
     fullName: '',
     email: '',
     phone: '',
-    service: '',
+    service: params.get('service') || '',
     date: params.get('date') || '',
     time: params.get('time') || '',
     notes: ''
   });
 
-  
+  const handleChange = (e) => {
+    const { id, value, name } = e.target;
+    // Use 'id' or 'name' depending on how you attribute your tags
+    const field = id || name; 
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState({ type: '', message: '' });
@@ -52,6 +57,16 @@ const Bookings = () => {
 
       if (response.status === 201) {
         setStatus({ type: 'success', message: 'Booking request submitted successfully! We will contact you soon.' });
+        setFormData({
+          fullName: '',
+          email: '',
+          phone: '',
+          service: '',
+          date: '',
+          time: '',
+          notes: ''
+        });
+        setToken(null);
       }
     } catch (error) {
       // This helps you see what the BACKEND is actually complaining about
@@ -108,11 +123,13 @@ const Bookings = () => {
           <div>
             <label htmlFor="full-name" className={labelClasses}>Full Name</label>
             <input 
-              id="full-name" 
+              id="fullName" 
+              name="fullName"
               type="text" 
+              value={formData.fullName}
               placeholder="Your full name"
               className={inputClasses}
-              onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+              onChange={handleChange}
               required
             />
           </div>
@@ -124,9 +141,11 @@ const Bookings = () => {
               <input 
                 id="email"
                 type="email" 
+                name="email"
+                value={formData.email}
                 placeholder="you@email.com"
                 className={inputClasses}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                onChange={handleChange}
                 required
               />
             </div>
@@ -135,9 +154,11 @@ const Bookings = () => {
               <input 
                 id="phone"
                 type="tel" 
+                name="phone"
+                value={formData.phone}
                 placeholder="(000) 000-0000"
                 className={inputClasses}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                onChange={handleChange}
                 required
               />
             </div>
@@ -148,8 +169,9 @@ const Bookings = () => {
             <label htmlFor="service-select" className={labelClasses}>Service</label>
             <select
               id="service-select" 
+              value={formData.service}
               className={`${inputClasses} appearance-none cursor-pointer`}
-              onChange={(e) => setFormData({...formData, service: e.target.value})}
+              onChange={handleChange}
               required
             >
               <option value="">Select a service...</option>
@@ -166,8 +188,10 @@ const Bookings = () => {
               <input 
                 id="date"
                 type="date" 
+                name="date"
+                value={formData.date}
                 className={inputClasses}
-                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                onChange={handleChange}
                 required
               />
             </div>
@@ -175,6 +199,8 @@ const Bookings = () => {
               <label htmlFor="time" className={labelClasses}>Preferred Time</label>
               <select 
                 id="time"
+                name="time"
+                value={formData.time}
                 className={`${inputClasses} appearance-none cursor-pointer`}
                 onChange={(e) => setFormData({...formData, time: e.target.value})}
                 required
@@ -192,9 +218,12 @@ const Bookings = () => {
             <label className={labelClasses}>Special Requests</label>
             <textarea 
               rows="4"
+              name="notes"
+              value={formData.notes}
+              id="notes"
               placeholder="Hair length, desired extensions, link to reference photos, etc."
               className={inputClasses}
-              onChange={(e) => setFormData({...formData, notes: e.target.value})}
+              onChange={handleChange}
             />
           </div>
 

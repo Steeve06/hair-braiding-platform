@@ -7,6 +7,10 @@ from datetime import datetime
 from .models import Booking
 from django.core.mail import send_mail
 from django.conf import settings
+import requests
+import os
+from rest_framework import status
+
 
 class UpdateBookingStatusView(APIView):
     # This ensures only logged-in admins can accept/reject
@@ -67,12 +71,44 @@ class AvailableSlotsView(APIView):
 class BookingListCreateView(generics.ListCreateAPIView):
     queryset = Booking.objects.all().order_by('-created_at')
     serializer_class = BookingSerializer
+
     def post(self, request, *args, **kwargs):
+        # 1. Extract the token from the request data sent by Booking.jsx
+        token = request.data.get('turnstile_token')
+        
+        if not token:
+            return Response(
+                {"error": "Security token is missing."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 2. Verify the token with Cloudflare
+        secret_key = os.environ.get('TURNSTILE_SECRET_KEY')
+        verify_url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+        
+        response = requests.post(verify_url, data={
+            'secret': secret_key,
+            'response': token,
+        })
+        
+        result = response.json()
+
+        # 3. Handle verification failure
+        if not result.get('success'):
+            return Response(
+                {"error": "Security check failed. Please try again."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 4. If verification passes, proceed with standard creation
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
-            print(serializer.errors) # This will show in your Render logs
-            return Response(serializer.errors, status=400)
-        return super().post(request, *args, **kwargs)
+            print(serializer.errors) # Visible in Render logs
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class BookingDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Booking.objects.all()
