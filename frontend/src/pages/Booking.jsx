@@ -54,39 +54,44 @@ const Bookings = () => {
     setStatus({ type: '', message: '' });
     
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
-      
-      // Ensure date is YYYY-MM-DD
-      const formattedDate = new Date(formData.date).toISOString().split('T')[0];
-      // Ensure time is HH:MM (Django TimeField can be picky about seconds)
-      // If your dropdown values are already "09:00", this just confirms it.
-      const formattedTime = formData.time.length === 5 ? formData.time : formData.time.substring(0, 5);
-      const payload = {
-        full_name: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        service: formData.service,
-        date: formData.date,
-        time: formData.time,
-        notes: formData.notes,
-        turnstile_token: token
-      };
+    const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
 
-      const response = await axios.post(`${API_URL}/api/bookings/`, payload);
+    // Ensure date is strictly YYYY-MM-DD
+    const rawDate = new Date(formData.date);
+    const formattedDate = rawDate.toISOString().split('T')[0];
 
-      if (response.status === 201 || response.status === 200) {
-        setStatus({ type: 'success', message: 'Booking request submitted successfully!' });
-        setFormData({ fullName: '', email: '', phone: '', service: '', date: '', time: '', notes: '' });
-        setToken(null);
-      }
-    } catch (error) {
-      // If Django sends HTML instead of JSON, this will show you the HTML 
-      // which sometimes contains the Python Traceback if DEBUG=True
-      console.error("Full Error Object:", error);
-      console.error("Response Data:", error.response?.data);
-      setStatus({ type: 'error', message: 'Server Error (500). Please check backend logs.' });
+    // Ensure time is HH:MM
+    const formattedTime = formData.time.split(' ')[0]; // Removes ' AM/PM' if present
+
+    const payload = {
+      full_name: formData.fullName,
+      email: formData.email,
+      phone: formData.phone,
+      service: formData.service,
+      date: formattedDate,
+      time: formattedTime,
+      notes: formData.notes,
+      turnstile_token: token
+    };
+
+    const response = await axios.post(`${API_URL}/api/bookings/`, payload);
+
+    if (response.status === 201) {
+      setStatus({ type: 'success', message: 'Booking request submitted successfully!' });
+      setFormData({ fullName: '', email: '', phone: '', service: '', date: '', time: '', notes: '' });
+      setToken(null);
     }
-  };
+  } catch (error) {
+    // This will now catch the 400 errors from the serializer and show them in console
+    console.error("Submission Error Details:", error.response?.data);
+    setStatus({ 
+      type: 'error', 
+      message: error.response?.data?.error || 'Submission failed. Please check the form.' 
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const inputClasses = "w-full bg-black/40 border border-white/10 px-4 py-3 text-white outline-none focus:border-luxury-gold transition-all";
   const labelClasses = "block text-[10px] tracking-[0.2em] text-luxury-gold uppercase mb-2 font-medium";

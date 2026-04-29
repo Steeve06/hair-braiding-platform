@@ -73,43 +73,43 @@ class BookingListCreateView(generics.ListCreateAPIView):
     serializer_class = BookingSerializer
 
     def post(self, request, *args, **kwargs):
-        # 1. Extract the token from the request data sent by Booking.jsx
+        # 1. Token Check
         token = request.data.get('turnstile_token')
-        
         if not token:
-            return Response(
-                {"error": "Security token is missing."}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "Security token is missing."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 2. Verify the token with Cloudflare
+        # 2. Cloudflare Verification
         secret_key = os.environ.get('TURNSTILE_SECRET_KEY')
+        if not secret_key:
+            # If this hits, you need to add the key to Render Environment Variables
+            return Response({"error": "Server configuration error (Secret Key missing)."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         verify_url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
-        
-        response = requests.post(verify_url, data={
-            'secret': secret_key,
-            'response': token,
-        })
-        
-        result = response.json()
+        try:
+            response = requests.post(verify_url, data={
+                'secret': secret_key,
+                'response': token,
+            }, timeout=5)
+            result = response.json()
+        except Exception:
+            return Response({"error": "Could not connect to security service."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
-        # 3. Handle verification failure
         if not result.get('success'):
-            return Response(
-                {"error": "Security check failed. Please try again."}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "Security check failed. Please refresh."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 4. If verification passes, proceed with standard creation
+        # 3. Serializer Validation
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
-            print(serializer.errors) # Visible in Render logs
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+        # 4. Database Save
+        try:
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            # Logs the real error to Render while returning a clean response
+            print(f"Database Save Error: {e}")
+            return Response({"error": "Database integrity error. Check field formats."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 class BookingDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
