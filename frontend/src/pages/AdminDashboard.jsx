@@ -28,33 +28,27 @@ const AdminDashboard = () => {
   });
 
   // --- TOKEN REFRESH HELPER ---
-  // ✅ FIXED: Automatically refreshes expired JWT access tokens
   const getValidToken = useCallback(async () => {
-    const token = localStorage.getItem('adminToken');
-    const refresh = localStorage.getItem('refreshToken');
+  const token = localStorage.getItem('adminToken');
+  const refresh = localStorage.getItem('refreshToken');
 
-    try {
-      // Quick test to see if current token is still valid
-      await axios.get(`${API_URL}/api/bookings/`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      return token;
-    } catch (err) {
-      if (err.response?.status === 401 && refresh) {
-        try {
-          const res = await axios.post(`${API_URL}/api/token/refresh/`, { refresh });
-          const newToken = res.data.access;
-          localStorage.setItem('adminToken', newToken);
-          return newToken;
-        } catch {
-          // Refresh token also expired — force logout
-          handleLogout();
-          return null;
-        }
-      }
-      return token;
-    }
-  }, [API_URL, handleLogout]);
+  if (!refresh) {
+    handleLogout();
+    return null;
+  }
+
+  try {
+    // Proactively refresh — don't test first, just get a fresh token
+    const res = await axios.post(`${API_URL}/api/token/refresh/`, { refresh });
+    const newToken = res.data.access;
+    localStorage.setItem('adminToken', newToken);
+    return newToken;
+  } catch {
+    // Refresh token expired — force logout
+    handleLogout();
+    return null;
+  }
+}, [API_URL, handleLogout]);
 
   // --- API LOGIC ---
 

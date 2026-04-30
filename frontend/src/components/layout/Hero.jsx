@@ -1,7 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden">
       {/* The background grid is already handled by your body selector in index.css, 
@@ -36,10 +39,10 @@ const Hero = () => {
 
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-          <button className="bg-luxury-gold text-luxury-black px-10 py-4 text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-white transition-colors duration-300 w-full sm:w-auto">
+          <button onClick={() => navigate('/bookings')} className="bg-luxury-gold text-luxury-black px-10 py-4 text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-white transition-colors duration-300 w-full sm:w-auto">
             Book Appointment
           </button>
-          <button className="border border-white/20 text-white px-10 py-4 text-[11px] font-bold tracking-[0.2em] uppercase hover:border-luxury-gold transition-colors duration-300 w-full sm:w-auto">
+          <button onClick={() => navigate('/services')} className="border border-white/20 text-white px-10 py-4 text-[11px] font-bold tracking-[0.2em] uppercase hover:border-luxury-gold transition-colors duration-300 w-full sm:w-auto">
             Explore Services
           </button>
         </div>

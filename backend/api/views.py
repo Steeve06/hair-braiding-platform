@@ -33,7 +33,7 @@ class UpdateBookingStatusView(APIView):
                     message=f" Hello {booking.full_name},\n\nYour appointment for {booking.service} on {booking.date} at {booking.time} has been confirmed.",
                     from_email=settings.EMAIL_HOST_USER,
                     recipient_list=[booking.email],
-                    fail_silently=True,                    
+                    fail_silently=False,                    
                 )
                 
             return Response(BookingSerializer(booking).data)
