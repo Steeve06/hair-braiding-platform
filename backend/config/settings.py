@@ -157,7 +157,7 @@ REST_FRAMEWORK = {
 }
 
 
-if DEBUG:
+if os.environ.get('DEBUG', 'False') == 'True':
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
