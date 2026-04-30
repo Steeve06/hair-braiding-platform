@@ -4,39 +4,32 @@ import { X } from 'lucide-react';
 import axios from 'axios';
 
 const AdminLoginModal = ({ isOpen, onClose }) => {
-  const [username, setUsername] = useState('admin'); // Default for demo
-  const [password, setPassword] = useState('braid2023'); // Default for demo
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'https://styledbymiah-backend.onrender.com';
-      const formData = new FormData();
-      formData.append('username', username);
-      formData.append('password', password);
-      const res = await axios.post(`${API_URL}/api/token/`, formData);
+      const res = await axios.post(`${API_URL}/api/token/`, { username, password });
 
       if (res.data.access) {
         localStorage.setItem('adminToken', res.data.access);
-        console.log('Login successful!');
+        localStorage.setItem('refreshToken', res.data.refresh); // ✅ FIXED: save refresh token
         onClose();
-        //redirect to dashboard
         window.location.href = '/admin-dashboard';
       }
     } catch (error) {
       alert('Login failed. Authorized Personnel Only. Please check your credentials and try again.');
     }
-
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 transition-all duration-300">
-      {/* Modal Container */}
       <div className="relative bg-black/90 p-12 border border-white/5 shadow-2xl w-full max-w-md">
         
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white/30 hover:text-white transition-colors"
@@ -45,20 +38,14 @@ const AdminLoginModal = ({ isOpen, onClose }) => {
           <X size={20} />
         </button>
 
-        {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-serif text-white tracking-wide">
-            Admin Login
-          </h2>
+          <h2 className="text-3xl font-serif text-white tracking-wide">Admin Login</h2>
           <p className="text-[10px] text-white/30 mt-2 tracking-widest uppercase leading-relaxed max-w-50 mx-auto">
             Restricted Access • Authorized Personnel Only
           </p>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleLogin} className="space-y-6">
-          
-          {/* Username Field */}
           <div>
             <label htmlFor="username" className="block text-[10px] tracking-[0.2em] text-luxury-gold uppercase mb-2 font-medium">
               USERNAME
@@ -73,7 +60,6 @@ const AdminLoginModal = ({ isOpen, onClose }) => {
             />
           </div>
 
-          {/* Password Field */}
           <div>
             <label htmlFor="password" className="block text-[10px] tracking-[0.2em] text-luxury-gold uppercase mb-2 font-medium">
               PASSWORD
@@ -88,7 +74,6 @@ const AdminLoginModal = ({ isOpen, onClose }) => {
             />
           </div>
 
-          {/* Submit Button */}
           <div className="pt-4">
             <button
               type="submit"
@@ -97,7 +82,6 @@ const AdminLoginModal = ({ isOpen, onClose }) => {
               Enter Dashboard
             </button>
           </div>
-
         </form>
       </div>
     </div>

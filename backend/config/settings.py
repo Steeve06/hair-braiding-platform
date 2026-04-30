@@ -137,6 +137,7 @@ from corsheaders.defaults import default_headers
 
 CORS_ALLOW_HEADERS = list(default_headers) + ['Authorization']
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False
 
 # This automatically trusts ANY Vercel preview link for your project
 CORS_ALLOWED_ORIGIN_REGEXES = [

@@ -10,34 +10,54 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || 'https://styledbymiah-backend.onrender.com';
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem('adminToken');
-    localStorage.removeItem('refreshToken')
+    localStorage.removeItem('refreshToken');
     navigate('/');
-  };
+  }, [navigate]);
 
   // --- STATE MANAGEMENT ---
-  const [activeTab, setActiveTab] = useState('bookings'); // Toggle between 'bookings' and 'services' view
-  const [data, setData] = useState([]); // Holds current list of records from backend
+  const [activeTab, setActiveTab] = useState('bookings');
+  const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Modal Visibility States
   const [showAddService, setShowAddService] = useState(false);
   const [showEditService, setShowEditService] = useState(false);
-  
-  // Form Data States
   const [editingService, setEditingService] = useState(null);
   const [newService, setNewService] = useState({
     title: '', description: '', price: '', duration: '', image: null, order: 0
   });
 
+  // --- TOKEN REFRESH HELPER ---
+  // ✅ FIXED: Automatically refreshes expired JWT access tokens
+  const getValidToken = useCallback(async () => {
+    const token = localStorage.getItem('adminToken');
+    const refresh = localStorage.getItem('refreshToken');
+
+    try {
+      // Quick test to see if current token is still valid
+      await axios.get(`${API_URL}/api/bookings/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return token;
+    } catch (err) {
+      if (err.response?.status === 401 && refresh) {
+        try {
+          const res = await axios.post(`${API_URL}/api/token/refresh/`, { refresh });
+          const newToken = res.data.access;
+          localStorage.setItem('adminToken', newToken);
+          return newToken;
+        } catch {
+          // Refresh token also expired — force logout
+          handleLogout();
+          return null;
+        }
+      }
+      return token;
+    }
+  }, [API_URL, handleLogout]);
+
   // --- API LOGIC ---
 
-  /**
-   * 1. FETCH DATA
-   * Retrieves bookings or services based on the active tab.
-   * Requires JWT token for authorization.
-   */
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     const token = localStorage.getItem('adminToken');
@@ -45,7 +65,6 @@ const AdminDashboard = () => {
     
     try {
       const endpoint = activeTab === 'bookings' ? 'bookings/' : 'services/';
-      const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
       const res = await axios.get(`${API_URL}/api/${endpoint}`, config);
       setData(res.data);
     } catch (err) {
@@ -53,98 +72,83 @@ const AdminDashboard = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [activeTab]);
+  }, [activeTab, API_URL]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  /**
-   * 2. UPDATE BOOKING STATUS
-   * Sends a PATCH request to update 'pending' bookings to 'confirmed' or 'rejected'.
-   */
+  // ✅ FIXED: Uses getValidToken() to handle expired tokens before patching
   const handleUpdateStatus = async (id, newStatus) => {
-    const token = localStorage.getItem('adminToken');
+    const token = await getValidToken();
+    if (!token) return;
+
     try {
       await axios.patch(
         `${API_URL}/api/bookings/${id}/status/`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
-      // Update UI locally to reflect the change immediately
-      setData(prevData => prevData.map(item => 
+      setData(prevData => prevData.map(item =>
         item.id === id ? { ...item, status: newStatus } : item
       ));
-      
       alert(`Booking ${newStatus} successfully.`);
-    } catch (err) { 
+    } catch (err) {
       console.error("Status update failed", err);
       alert("Failed to update status.");
     }
   };
 
-  /**
-   * 3. DELETE RECORD
-   * Removes a booking or service permanently from the database.
-   */
   const handleDelete = async (id, type) => {
     if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
-    const token = localStorage.getItem('adminToken');
+    const token = await getValidToken();
+    if (!token) return;
+
     try {
       const endpoint = type === 'booking' ? 'bookings' : 'services';
       await axios.delete(`${API_URL}/api/${endpoint}/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      fetchData(); // Refresh list after deletion
+      fetchData();
     } catch (err) {
       alert("Delete failed");
     }
   };
 
-  /**
-   * 4. ADD SERVICE
-   */
+  // ✅ FIXED: Removed hardcoded old backend URL
   const handleAddService = async (e) => {
-  e.preventDefault();
-  const token = localStorage.getItem('adminToken');
-  
-  // 1. Create the FormData object (Required for images)
-  const formData = new FormData();
-  Object.keys(newService).forEach(key => {
-    if (newService[key] !== null) {
-      formData.append(key, newService[key]);
-    }
-  });
+    e.preventDefault();
+    const token = await getValidToken();
+    if (!token) return;
 
-  try {
-    // 2. Send the request with the token
-    const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
-    await axios.post(`${API_URL}/api/services/`, formData, {
-      headers: { 
-        Authorization: `Bearer ${token}`, 
-        'Content-Type': 'multipart/form-data' 
-      }
+    const formData = new FormData();
+    Object.keys(newService).forEach(key => {
+      if (newService[key] !== null) formData.append(key, newService[key]);
     });
 
-    // 3. Reset UI on success
-    setShowAddService(false);
-    fetchData(); 
-  } catch (err) {
-    console.error("Add Service Error:", err.response?.data);
-    alert("Failed to add service. Please check your admin permissions.");
-  }
-};
+    try {
+      await axios.post(`${API_URL}/api/services/`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setShowAddService(false);
+      setNewService({ title: '', description: '', price: '', duration: '', image: null, order: 0 });
+      fetchData();
+    } catch (err) {
+      console.error("Add Service Error:", err.response?.data);
+      alert("Failed to add service. Please check your admin permissions.");
+    }
+  };
 
-  /**
-   * 5. UPDATE SERVICE
-   */
   const handleUpdateService = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('adminToken');
+    const token = await getValidToken();
+    if (!token) return;
+
     const formData = new FormData();
     Object.keys(editingService).forEach(key => {
-      // Only append if it's not the existing image URL string
       if (key === 'image' && typeof editingService[key] === 'string') return;
       if (editingService[key] !== null) formData.append(key, editingService[key]);
     });
@@ -159,8 +163,6 @@ const AdminDashboard = () => {
       alert("Failed to update service");
     }
   };
-
-  // --- RENDERING HELPERS ---
 
   return (
     <div className="min-h-screen bg-luxury-black pt-32 pb-20 px-6 lg:px-16 text-white">
@@ -208,7 +210,7 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        {/* Dynamic Data Table */}
+        {/* Data Table */}
         <div className="bg-white/5 border border-white/5 rounded-sm overflow-hidden shadow-2xl">
           {isLoading ? (
             <div className="p-20 text-center text-luxury-gold animate-pulse tracking-widest uppercase text-xs">Loading Secure Data...</div>
@@ -239,19 +241,17 @@ const AdminDashboard = () => {
                           </td>
                           <td className="p-6 text-center">
                             <span className={`px-3 py-1 text-[9px] font-bold tracking-widest uppercase rounded-full ${
-                                item.status === 'confirmed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 
-                                item.status === 'rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                                'bg-luxury-gold/10 text-luxury-gold border border-luxury-gold/20'
-                              }`}>
+                              item.status === 'confirmed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 
+                              item.status === 'rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                              'bg-luxury-gold/10 text-luxury-gold border border-luxury-gold/20'
+                            }`}>
                               {item.status}
                             </span>
                           </td>
                           <td className="p-6 text-right">
                             <div className="flex justify-end gap-3 items-center">
-                              {/* --- MISSING BUTTONS INTEGRATED HERE --- */}
                               {item.status === 'pending' && (
                                 <div className="flex gap-2 mr-4">
-                                  {/* Accept Button */}
                                   <button 
                                     onClick={() => handleUpdateStatus(item.id, 'confirmed')} 
                                     className="p-2 bg-green-500/10 text-green-400 hover:bg-green-500 hover:text-white rounded-full transition-all"
@@ -259,7 +259,6 @@ const AdminDashboard = () => {
                                   >
                                     <CheckCircle size={16} />
                                   </button>
-                                  {/* Reject Button */}
                                   <button 
                                     onClick={() => handleUpdateStatus(item.id, 'rejected')} 
                                     className="p-2 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-full transition-all"
@@ -279,7 +278,6 @@ const AdminDashboard = () => {
                           </td>
                         </>
                       ) : (
-                        // Services Row (Already exists in your file)
                         <>
                           <td className="p-6 flex items-center gap-4">
                             <img src={item.image} alt="" className="w-12 h-12 object-cover border border-white/10 grayscale group-hover:grayscale-0 transition-all" />
@@ -308,8 +306,7 @@ const AdminDashboard = () => {
             </div>
           )}
         </div>
-        
-        {/* Modals for Add/Edit Service go here (Keep your existing modal code) */}
+
         {/* MODAL: ADD SERVICE */}
         {showAddService && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
@@ -321,7 +318,7 @@ const AdminDashboard = () => {
                   <input placeholder="Title" required className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setNewService({...newService, title: e.target.value})} />
                 </div>
                 <input placeholder="Price" className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setNewService({...newService, price: e.target.value})} />
-                <input placeholder="Duration (HH:MM:SS)" className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setNewService({...newService, duration: e.target.value})} />
+                <input placeholder="Duration (e.g. 2 hours)" className="w-full bg-white/5 border border-white/10 p-3 text-sm" onChange={e => setNewService({...newService, duration: e.target.value})} />
                 <div className="col-span-2">
                   <input type="file" accept="image/*" className="text-xs" onChange={e => setNewService({...newService, image: e.target.files[0]})} />
                 </div>
