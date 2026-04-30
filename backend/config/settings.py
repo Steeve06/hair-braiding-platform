@@ -133,6 +133,11 @@ CORS_ALLOWED_ORIGINS = [
     "https://styledbymiah.vercel.app",
 ]
 
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = list(default_headers) + ['Authorization']
+CORS_ALLOW_CREDENTIALS = True
+
 # This automatically trusts ANY Vercel preview link for your project
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://styledbymiah-.*\.vercel\.app$",
