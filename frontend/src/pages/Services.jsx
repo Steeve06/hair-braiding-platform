@@ -6,6 +6,7 @@ import axios from 'axios';
 const Services = () => {
   const [services, setServices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -13,6 +14,8 @@ const Services = () => {
       const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
       const response = await axios.get(`${API_URL}/api/services/`);
       setServices(response.data);
+    } catch {
+      setError(true);
     } finally {
       setIsLoading(false);
     }
@@ -24,6 +27,10 @@ const Services = () => {
 
   if (isLoading) {
     return <div className="text-white text-center pt-40">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-400 text-center pt-40 tracking-widest uppercase text-xs">Failed to load services. Please try again later.</div>;
   }
 
   return (
@@ -71,7 +78,7 @@ const Services = () => {
               <div className="pt-8 border-t border-white/10 flex justify-between items-end">
                 <div>
                   <p className="text-3xl font-serif text-luxury-gold">
-                    {service.price}
+                    ${parseFloat(service.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                   <p className="text-[10px] text-white/30 tracking-widest mt-1">
                     EST. {service.duration}
@@ -79,7 +86,7 @@ const Services = () => {
                 </div>
                 <button 
                   className="text-[10px] tracking-[0.2em] text-white uppercase border-b border-luxury-gold pb-1 hover:text-luxury-gold transition-colors"
-                  onClick={() => navigate('/bookings')}
+                  onClick={() => navigate(`/bookings?service=${encodeURIComponent(service.title)}`)}
                 >
                   Book Now
                 </button>

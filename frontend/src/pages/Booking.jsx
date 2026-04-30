@@ -56,9 +56,11 @@ const Bookings = () => {
     try {
     const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
 
-    // Ensure date is strictly YYYY-MM-DD
+    // Ensure date is strictly YYYY-MM-DD in local time (not UTC, which can shift the day)
     const rawDate = new Date(formData.date);
-    const formattedDate = rawDate.toISOString().split('T')[0];
+    const offset = rawDate.getTimezoneOffset();
+    const localDate = new Date(rawDate.getTime() + offset * 60 * 1000);
+    const formattedDate = localDate.toISOString().split('T')[0];
 
     // Ensure time is HH:MM
     const formattedTime = formData.time.split(' ')[0]; // Removes ' AM/PM' if present

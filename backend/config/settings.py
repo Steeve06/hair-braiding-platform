@@ -86,7 +86,7 @@ DATABASES = {
     'default': dj_database_url.config(
         default=os.getenv('DATABASE_URL'),
         conn_max_age=600,
-        ssl_require=True  # <--- THIS IS THE KEY FOR NEON
+        conn_kwargs={'sslmode': 'require'},
     )
 }
 
@@ -112,6 +112,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LANGUAGE_CODE = 'en-us'
 
@@ -140,9 +142,7 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 CSRF_TRUSTED_ORIGINS = [
     "https://styledbymiah.vercel.app",
     "https://backend-styledbymiah.onrender.com",
-    # If using previews often, add the regex-matched domains here too:
-    "https://styledbymiah-r3xgpbxe2-steeve06s-projects.vercel.app", 
-    "https://styledbymiah-r3xgpbxe2-steeve06s-projects.vercel.app"
+    "https://styledbymiah-r3xgpbxe2-steeve06s-projects.vercel.app",
 ]
 
 REST_FRAMEWORK = {
@@ -156,12 +156,12 @@ REST_FRAMEWORK = {
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
-    # On Render, you need an actual SMTP provider (SendGrid, Mailgun, Gmail)
-    # If you don't have one yet, keep it as console or use a dummy file backend to prevent 500 errors
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' 
-
-# Add this to prevent the app from crashing if email fails
-EMAIL_FAIL_SILENTLY = True
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
 
 

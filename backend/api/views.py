@@ -113,6 +113,7 @@ class BookingListCreateView(generics.ListCreateAPIView):
 class BookingDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
+    permission_classes = [permissions.IsAdminUser]
     
 class ServiceListView(generics.ListCreateAPIView):
     queryset = Service.objects.all().order_by('order')
@@ -128,4 +129,3 @@ class ServiceDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
     permission_classes = [permissions.IsAdminUser]
-  
