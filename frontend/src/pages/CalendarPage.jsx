@@ -20,7 +20,7 @@ const CalendarPage = () => {
       const localDate = new Date(selectedDate.getTime() - (offset * 60 * 1000));
       const formattedDate = localDate.toISOString().split('T')[0];
       
-      const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
+      const API_URL = import.meta.env.VITE_API_URL || 'https://styledbymiah-backend.onrender.com';
       const response = await axios.get(`${API_URL}/api/available-slots/?date=${formattedDate}`);
       setAvailableSlots(response.data.slots);
     } catch (error) {

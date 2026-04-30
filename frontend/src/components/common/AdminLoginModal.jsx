@@ -10,7 +10,7 @@ const AdminLoginModal = ({ isOpen, onClose }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
+      const API_URL = import.meta.env.VITE_API_URL || 'https://styledbymiah-backend.onrender.com';
       const formData = new FormData();
       formData.append('username', username);
       formData.append('password', password);

@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
+  const API_URL = import.meta.env.VITE_API_URL || 'https://styledbymiah-backend.onrender.com';
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');

@@ -140,8 +140,7 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 
 CSRF_TRUSTED_ORIGINS = [
     "https://styledbymiah.vercel.app",
-    "https://backend-styledbymiah.onrender.com",
-    "https://styledbymiah-r3xgpbxe2-steeve06s-projects.vercel.app",
+    "https://styledbymiah-backend.onrender.com",
 ]
 
 REST_FRAMEWORK = {

@@ -11,7 +11,7 @@ const Services = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-      const API_URL = import.meta.env.VITE_API_URL || 'https://backend-styledbymiah.onrender.com';
+      const API_URL = import.meta.env.VITE_API_URL || 'https://styledbymiah-backend.onrender.com';
       const response = await axios.get(`${API_URL}/api/services/`);
       setServices(response.data);
     } catch {
