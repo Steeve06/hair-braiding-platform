@@ -8,7 +8,7 @@ describe('AdminLoginModal', () => {
   it('does not render when isOpen is false', () => {
     const onClose = vi.fn();
     render(<AdminLoginModal isOpen={false} onClose={onClose} />);
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Admin Login/i)).not.toBeInTheDocument();
   });
 
   it('renders correctly when isOpen is true', () => {
@@ -16,8 +16,9 @@ describe('AdminLoginModal', () => {
     render(<AdminLoginModal isOpen={true} onClose={onClose} />);
     
     expect(screen.getByRole('heading', { name: /Admin Login/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/USERNAME/i)).toHaveValue('admin');
-    expect(screen.getByLabelText(/PASSWORD/i)).toHaveValue('braid2023');
+    // ✅ FIXED: inputs now start empty, not with hardcoded credentials
+    expect(screen.getByLabelText(/USERNAME/i)).toHaveValue('');
+    expect(screen.getByLabelText(/PASSWORD/i)).toHaveValue('');
   });
 
   it('calls onClose when the close button (X) is clicked', () => {
@@ -27,5 +28,19 @@ describe('AdminLoginModal', () => {
     const closeButton = screen.getByLabelText(/Close modal/i);
     fireEvent.click(closeButton);
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('updates username and password fields on user input', () => {
+    const onClose = vi.fn();
+    render(<AdminLoginModal isOpen={true} onClose={onClose} />);
+
+    const usernameInput = screen.getByLabelText(/USERNAME/i);
+    const passwordInput = screen.getByLabelText(/PASSWORD/i);
+
+    fireEvent.change(usernameInput, { target: { value: 'testadmin' } });
+    fireEvent.change(passwordInput, { target: { value: 'testpass123' } });
+
+    expect(usernameInput).toHaveValue('testadmin');
+    expect(passwordInput).toHaveValue('testpass123');
   });
 });
