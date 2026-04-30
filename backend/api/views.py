@@ -12,11 +12,8 @@ import os
 from rest_framework import status
 from django.http import JsonResponse
 
-class UpdateBookingStatusView(APIView):
-    # This ensures only logged-in admins can accept/reject
-    permission_classes = [permissions.IsAdminUser]
 
-    def test_email(request):
+def test_email(request):
         try:
             send_mail(
                 subject="Test Email from StyledByMiah",
@@ -28,6 +25,9 @@ class UpdateBookingStatusView(APIView):
             return JsonResponse({"status": "Email sent successfully"})
         except Exception as e:
             return JsonResponse({"status": "FAILED", "error": str(e)})
+class UpdateBookingStatusView(APIView):
+    # This ensures only logged-in admins can accept/reject
+    permission_classes = [permissions.IsAdminUser]
         
     def patch(self, request, pk):
         try:
