@@ -12,6 +12,8 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView
 )
 
+from .views import test_email
+
 urlpatterns = [
     # Auth Endpoints (CRITICAL FOR LOGIN)
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -29,5 +31,6 @@ urlpatterns = [
     path('available-slots/', AvailableSlotsView.as_view(), name='available-slots'),
     
    path('bookings/<int:pk>/status/', UpdateBookingStatusView.as_view(), name='update-status'),
+   path('test-email/', test_email, name='test-email'),
 ]
 

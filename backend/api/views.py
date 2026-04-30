@@ -10,12 +10,25 @@ from django.conf import settings
 import requests
 import os
 from rest_framework import status
-
+from django.http import JsonResponse
 
 class UpdateBookingStatusView(APIView):
     # This ensures only logged-in admins can accept/reject
     permission_classes = [permissions.IsAdminUser]
 
+    def test_email(request):
+        try:
+            send_mail(
+                subject="Test Email from StyledByMiah",
+                message="If you see this, email is working correctly.",
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[settings.EMAIL_HOST_USER],  # sends to yourself
+                fail_silently=False,
+            )
+            return JsonResponse({"status": "Email sent successfully"})
+        except Exception as e:
+            return JsonResponse({"status": "FAILED", "error": str(e)})
+        
     def patch(self, request, pk):
         try:
             booking = Booking.objects.get(pk=pk)
